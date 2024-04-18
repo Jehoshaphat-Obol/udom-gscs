@@ -1,8 +1,51 @@
 import React, { Component } from 'react'
 import { Link } from 'react-router-dom'
+import axios from 'axios'
 
+const apiUrl = import.meta.env.VITE_API_URL;
 
 export default class CoordinatorDashboard extends Component {
+    constructor(props){
+        super(props);
+        this.state = {
+            "graduates_count": null,
+            "guests_count": null,
+        }
+    }
+    componentDidMount(){
+        axios.get(apiUrl + 'students/')
+        .then(response => {
+            const students = response.data;
+            console.log(students)
+
+            const graduates = students.filter((student)=>{
+                return student.graduation_status == "EX"
+            })
+
+            this.setState(prevState => ({
+                graduates_count: {
+                    ...prevState.graduates_count, // Preserve other state properties
+                    expected: graduates.length,
+                    postponed: students.length - graduates.length,
+                },
+            }), () => {
+                console.log(this.state);
+            });
+
+        })
+        .catch(error => {
+            console.error(error)
+        })
+
+        axios.get(apiUrl + "guests/")
+        .then(response => {
+            const guests = response.data;
+            // const expected;
+        })
+        .catch(error=>{
+            console.log(error);
+        })
+    }
   render() {
     return (
         <>
@@ -40,8 +83,16 @@ export default class CoordinatorDashboard extends Component {
                                                 <i className="bx bxs-graduation"></i>
                                             </div>
                                             <div className="ps-3">
-                                                <h6>1,445</h6>
-                                                <span className="text-success small pt-1 fw-bold">124</span> <span className="text-muted small pt-2 ps-1">postponed</span>
+                                                {(this.state.graduates_count == null)?(
+                                                    <div className="spinner-border text-primary" role="status">
+                                                        <span className="visually-hidden">Loading...</span>
+                                                    </div>
+                                                ):(
+                                                    <>
+                                                        <h6>{this.state.graduates_count.expected}</h6>
+                                                        <span className="text-success small pt-1 fw-bold">{this.state.graduates_count.postponed}</span> <span className="text-muted small pt-2 ps-1">postponed</span>
+                                                    </>
+                                                )}
                                             </div>
                                         </div>
                                     </div>
