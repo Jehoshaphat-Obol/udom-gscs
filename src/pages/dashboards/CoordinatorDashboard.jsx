@@ -1,6 +1,7 @@
 import React, { Component } from 'react'
 import { Link } from 'react-router-dom'
 import axios from 'axios'
+import { DataTable } from 'simple-datatables';
 
 const apiUrl = import.meta.env.VITE_API_URL;
 
@@ -10,41 +11,165 @@ export default class CoordinatorDashboard extends Component {
         this.state = {
             "graduates_count": null,
             "guests_count": null,
+            "students": null,
+            "guests": null,
+            "new_student": {
+                user: {
+                    username: '',
+                    email: '',
+                    first_name: '',
+                    last_name: '',
+                    password: '',
+                },
+                graduation_status: 'EX',
+                degree_program: '',
+                degree_level: '',
+                college: '',
+            },
         }
+
+        this.handleStudentRegistration = this.handleStudentRegistration.bind(this)
     }
     componentDidMount(){
+        // get students
         axios.get(apiUrl + 'students/')
         .then(response => {
             const students = response.data;
-            console.log(students)
-
             const graduates = students.filter((student)=>{
                 return student.graduation_status == "EX"
             })
 
             this.setState(prevState => ({
                 graduates_count: {
-                    ...prevState.graduates_count, // Preserve other state properties
+                    ...prevState.graduates_count, 
                     expected: graduates.length,
                     postponed: students.length - graduates.length,
                 },
+                students,
             }), () => {
-                console.log(this.state);
+
             });
+            setTimeout(() =>{
+                const students_table = document.querySelector('.students-datatable');
+                const students_datatable = new DataTable(students_table)
+            }, 100)
 
         })
         .catch(error => {
             console.error(error)
         })
 
+        // get guests
         axios.get(apiUrl + "guests/")
         .then(response => {
             const guests = response.data;
-            // const expected;
+            const expected = guests.filter((guest)=>{
+                return guest.status = "EX"
+            })
+
+            this.setState(prevState => ({
+                guests_count: {
+                    ...prevState.guests_count,
+                    expected: expected.length,
+                    postponed: guests.length - expected.length,
+                },
+                guests
+            }),
+            ()=>{
+            }
+            )
+            setTimeout(() => {
+                const guests_table = document.querySelector('.guests-datatable')
+                const guests_datatable = new DataTable(guests_table)
+            }, 200)
         })
         .catch(error=>{
             console.log(error);
         })
+    }
+
+    handleChange = (e) => {
+        const { name, value } = e.target;
+
+        this.setState((prevState) => ({
+            new_student: {
+                ...prevState.new_student,
+                [name]: value,
+            }
+        }), ()=>{
+        });
+    };
+    handleStudentChange = (e) => {
+        const {name, value} = e.target;
+
+        this.setState((prevState)=> ({
+            new_student: {
+                ...prevState.new_student,
+                user: {
+                    ...prevState.new_student.user,
+                    [name]: value,
+                }
+            }
+        }))
+    }
+
+    reloadStudentsTable(){
+        // get students
+        axios.get(apiUrl + 'students/')
+            .then(response => {
+                const students = response.data;
+                const graduates = students.filter((student) => {
+                    return student.graduation_status == "EX"
+                })
+
+                this.setState(prevState => ({
+                    graduates_count: {
+                        ...prevState.graduates_count,
+                        expected: graduates.length,
+                        postponed: students.length - graduates.length,
+                    },
+                    students,
+                }), () => {
+                    setTimeout(()=>{
+                        const students_table = document.querySelector('.students-datatable');
+                        const students_datatable = new DataTable(students_table)
+                    }, 200)
+                });
+
+            })
+            .catch(error => {
+                console.error(error)
+            })
+    }
+
+    handleStudentRegistration(e){
+        e.preventDefault();
+        axios.post(apiUrl + 'students/', this.state.new_student)
+        .then(response => {
+            //clear the form
+            this.setState((prevState)=>({
+                new_student: {
+                    ...prevState.new_student,
+                    user: {
+                        username: '',
+                        email: '',
+                        first_name: '',
+                        last_name: '',
+                        password: '',
+                    },
+                    graduation_status: 'EX',
+                    degree_program: '',
+                    degree_level: '',
+                    college: '',
+                },
+            }
+            ))
+            this.reloadStudentsTable();
+        })
+        .catch(error=>{
+            console.log(error)
+        })
+
     }
   render() {
     return (
@@ -121,8 +246,16 @@ export default class CoordinatorDashboard extends Component {
                                                 <i className="bi bi-people"></i>
                                             </div>
                                             <div className="ps-3">
-                                                <h6>3,264</h6>
-                                                <span className="text-success small pt-1 fw-bold">847</span> <span className="text-muted small pt-2 ps-1">postponed</span>
+                                                {(this.state.guests_count == null) ? (
+                                                    <div className="spinner-border text-primary" role="status">
+                                                        <span className="visually-hidden">Loading...</span>
+                                                    </div>
+                                                ) : (
+                                                    <>
+                                                            <h6>{this.state.guests_count.expected}</h6>
+                                                            <span className="text-success small pt-1 fw-bold">{this.state.guests_count.postponed}</span> <span className="text-muted small pt-2 ps-1">postponed</span>
+                                                    </>
+                                                )}
                                             </div>
                                         </div>
                                     </div>
@@ -149,54 +282,48 @@ export default class CoordinatorDashboard extends Component {
                                     <div className="card-body">
                                         <h5 className="card-title">Graduates <span>| All</span></h5>
 
-                                        <table className="table table-borderless datatable">
-                                            <thead>
-                                                <tr>
-                                                    <th scope="col">Reg. No</th>
-                                                    <th scope="col">Name</th>
-                                                    <th scope="col">Collage</th>
-                                                    <th scope="col">Course</th>
-                                                    <th scope="col">Status</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                <tr>
-                                                    <th scope="row"><a href="#">#2457</a></th>
-                                                    <td>Brandon Jacob</td>
-                                                    <td><a href="#" className="text-primary">At praesentium minu</a></td>
-                                                    <td>$64</td>
-                                                    <td><span className="badge bg-success">Approved</span></td>
-                                                </tr>
-                                                <tr>
-                                                    <th scope="row"><a href="#">#2147</a></th>
-                                                    <td>Bridie Kessler</td>
-                                                    <td><a href="#" className="text-primary">Blanditiis dolor omnis similique</a></td>
-                                                    <td>$47</td>
-                                                    <td><span className="badge bg-warning">Pending</span></td>
-                                                </tr>
-                                                <tr>
-                                                    <th scope="row"><a href="#">#2049</a></th>
-                                                    <td>Ashleigh Langosh</td>
-                                                    <td><a href="#" className="text-primary">At recusandae consectetur</a></td>
-                                                    <td>$147</td>
-                                                    <td><span className="badge bg-success">Approved</span></td>
-                                                </tr>
-                                                <tr>
-                                                    <th scope="row"><a href="#">#2644</a></th>
-                                                    <td>Angus Grady</td>
-                                                    <td><a href="#" className="text-primar">Ut voluptatem id earum et</a></td>
-                                                    <td>$67</td>
-                                                    <td><span className="badge bg-danger">Rejected</span></td>
-                                                </tr>
-                                                <tr>
-                                                    <th scope="row"><a href="#">#2644</a></th>
-                                                    <td>Raheem Lehner</td>
-                                                    <td><a href="#" className="text-primary">Sunt similique distinctio</a></td>
-                                                    <td>$165</td>
-                                                    <td><span className="badge bg-success">Approved</span></td>
-                                                </tr>
-                                            </tbody>
-                                        </table>
+                                            
+                                                {(this.state.students == null) ? (
+                                                    <div className="spinner-border text-primary d-flex justify-content-center" role="status">
+                                                        <span className="visually-hidden">Loading...</span>
+                                                    </div>
+                                                ) : (
+                                                    <>
+                                                        <table className="table table-borderless students-datatable">
+                                                            <thead>
+                                                                <tr>
+                                                                    <th scope="col">Reg. No</th>
+                                                                    <th scope="col">Name</th>
+                                                                    <th scope="col">Collage</th>
+                                                                    <th scope="col">Degree Level</th>
+                                                                    <th scope="col">Program</th>
+                                                                    <th scope="col">Status</th>
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody>
+                                                                {
+                                                                    this.state.students.map((student)=>(
+                                                                        <tr key={student.id}>
+                                                                            <th scope="row"><a href="#">{student.user.username}</a></th>
+                                                                            <td>{student.user.first_name + " " + student.user.last_name}</td>
+                                                                            <td><a href="#" className="text-primary">{student.college}</a></td>
+                                                                            <td>{student.degree_level}</td>
+                                                                            <td>{student.degree_program}</td>
+                                                                            {
+                                                                                (student.graduation_status == "EX")?(
+                                                                                    <td><span className="badge bg-success">Expected</span></td>
+                                                                                ):(
+                                                                                    <td><span className="badge bg-danger">Postponed</span></td>
+                                                                                )
+                                                                            }
+                                                                        </tr>
+                                                                    ))
+                                                                }
+                                                            </tbody>
+                                                        </table>
+                                                    </>
+                                                )}
+
 
                                     </div>
 
@@ -218,57 +345,46 @@ export default class CoordinatorDashboard extends Component {
                                         </ul>
                                     </div>
 
-                                    <div className="card-body">
-                                        <h5 className="card-title">Recent Sales <span>| Today</span></h5>
 
-                                        <table className="table table-borderless datatable">
-                                            <thead>
-                                                <tr>
-                                                    <th scope="col">#</th>
-                                                    <th scope="col">Name</th>
-                                                    <th scope="col">From</th>
-                                                    <th scope="col">Position</th>
-                                                    <th scope="col">Status</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                <tr>
-                                                    <th scope="row"><a href="#">#2457</a></th>
-                                                    <td>Brandon Jacob</td>
-                                                    <td><a href="#" className="text-primary">At praesentium minu</a></td>
-                                                    <td>$64</td>
-                                                    <td><span className="badge bg-success">Approved</span></td>
-                                                </tr>
-                                                <tr>
-                                                    <th scope="row"><a href="#">#2147</a></th>
-                                                    <td>Bridie Kessler</td>
-                                                    <td><a href="#" className="text-primary">Blanditiis dolor omnis similique</a></td>
-                                                    <td>$47</td>
-                                                    <td><span className="badge bg-warning">Pending</span></td>
-                                                </tr>
-                                                <tr>
-                                                    <th scope="row"><a href="#">#2049</a></th>
-                                                    <td>Ashleigh Langosh</td>
-                                                    <td><a href="#" className="text-primary">At recusandae consectetur</a></td>
-                                                    <td>$147</td>
-                                                    <td><span className="badge bg-success">Approved</span></td>
-                                                </tr>
-                                                <tr>
-                                                    <th scope="row"><a href="#">#2644</a></th>
-                                                    <td>Angus Grady</td>
-                                                    <td><a href="#" className="text-primar">Ut voluptatem id earum et</a></td>
-                                                    <td>$67</td>
-                                                    <td><span className="badge bg-danger">Rejected</span></td>
-                                                </tr>
-                                                <tr>
-                                                    <th scope="row"><a href="#">#2644</a></th>
-                                                    <td>Raheem Lehner</td>
-                                                    <td><a href="#" className="text-primary">Sunt similique distinctio</a></td>
-                                                    <td>$165</td>
-                                                    <td><span className="badge bg-success">Approved</span></td>
-                                                </tr>
-                                            </tbody>
-                                        </table>
+                                    <div className="card-body">
+                                        <h5 className="card-title">Guests <span>| All</span></h5>
+
+
+                                        {(this.state.students == null) ? (
+                                            <div className="spinner-border text-primary d-flex justify-content-center" role="status">
+                                                <span className="visually-hidden">Loading...</span>
+                                            </div>
+                                        ) : (
+                                                <>
+                                                    <table className="table table-borderless guests-datatable">
+                                                        <thead>
+                                                            <tr>
+                                                                <th scope="col">Reg. No</th>
+                                                                <th scope="col">Name</th>
+                                                                <th scope="col">Type</th>
+                                                                <th scope="col">Status</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                            {this.state.guests.map(guest => (
+                                                                <tr key={guest.id}>
+                                                                    <th scope="row"><a href="#">{guest.student}</a></th>
+                                                                    <td>{guest.name}</td>
+                                                                    <td>{guest.type}</td>
+                                                                    {
+                                                                        (guest.status == "EX") ? (
+                                                                            <td><span className="badge bg-success">Expected</span></td>
+                                                                        ) : (
+                                                                            <td><span className="badge bg-danger">Postponed</span></td>
+                                                                        )
+                                                                    }
+                                                                </tr>
+                                                            ))}
+                                                        </tbody>
+                                                    </table>
+                                                </>
+                                        )}
+
 
                                     </div>
 
@@ -279,69 +395,205 @@ export default class CoordinatorDashboard extends Component {
 
                     <div className="col-lg-4">
                         <div className="card">
-                            <div className="filter">
-                                <a className="icon" href="#" data-bs-toggle="dropdown"><i className="bi bi-three-dots"></i></a>
-                                <ul className="dropdown-menu dropdown-menu-end dropdown-menu-arrow">
-                                    <li className="dropdown-header text-start">
-                                        <h6>Filter</h6>
-                                    </li>
-
-                                    <li><a className="dropdown-item" href="#">Today</a></li>
-                                    <li><a className="dropdown-item" href="#">This Month</a></li>
-                                    <li><a className="dropdown-item" href="#">This Year</a></li>
-                                </ul>
-                            </div>
-
                             <div className="card-body">
-                                <h5 className="card-title">Recent Activity <span>| Today</span></h5>
+                                <h5 className="card-title">Register Student</h5>
+                                <div>
+                                    <form onSubmit={this.handleStudentRegistration}>
+                                        <div className="row mb-3">
+                                            <div className="col-sm-12">
+                                                <input
+                                                    type="text"
+                                                    className="form-control"
 
-                                <div className="activity">
+                                                    name="username"
+                                                    value={this.state.new_student.user.username}
+                                                    onChange={this.handleStudentChange}
+                                                    placeholder='Registration Number'
+                                                />
+                                            </div>
+                                        </div>
+                                        <div className="row mb-3">
+                                            <div className="col-sm-12">
+                                                <input
+                                                    type="email"
+                                                    className="form-control"
+                                                    id="inputEmail"
+                                                    name="email"
+                                                    value={this.state.new_student.user.email}
+                                                    onChange={this.handleStudentChange}
+                                                    placeholder='example@email.com'
+                                                />
+                                            </div>
+                                        </div>
+                                        <div className="row mb-3">
+                                            <div className="col-sm-12">
+                                                <input
+                                                    type="text"
+                                                    className="form-control"
 
-                                    <div className="activity-item d-flex">
-                                        <div className="activite-label">32 min</div>
-                                        <i className='bi bi-circle-fill activity-badge text-success align-self-start'></i>
-                                        <div className="activity-content">
-                                            Quia quae rerum <a href="#" className="fw-bold text-dark">explicabo officiis</a> beatae
+                                                    name="first_name"
+                                                    value={this.state.new_student.user.first_name}
+                                                    onChange={this.handleStudentChange}
+                                                    placeholder='First name'
+                                                />
+                                            </div>
                                         </div>
-                                    </div>
+                                        <div className="row mb-3">
+                                            <div className="col-sm-12">
+                                                <input
+                                                    type="text"
+                                                    className="form-control"
 
-                                    <div className="activity-item d-flex">
-                                        <div className="activite-label">56 min</div>
-                                        <i className='bi bi-circle-fill activity-badge text-danger align-self-start'></i>
-                                        <div className="activity-content">
-                                            Voluptatem blanditiis blanditiis eveniet
+                                                    name="last_name"
+                                                    value={this.state.new_student.user.last_name}
+                                                    onChange={this.handleStudentChange}
+                                                    placeholder='Last name'
+                                                />
+                                            </div>
                                         </div>
-                                    </div>
-                                    <div className="activity-item d-flex">
-                                        <div className="activite-label">2 hrs</div>
-                                        <i className='bi bi-circle-fill activity-badge text-primary align-self-start'></i>
-                                        <div className="activity-content">
-                                            Voluptates corrupti molestias voluptatem
+                                        <div className="row mb-3">
+                                            <div className="col-sm-12">
+                                                <input
+                                                    type="password"
+                                                    className="form-control"
+                                                    id="inputPassword"
+                                                    name="password"
+                                                    value={this.state.new_student.user.password}
+                                                    onChange={this.handleStudentChange}
+                                                    placeholder='password'
+                                                />
+                                            </div>
                                         </div>
-                                    </div>
-                                    <div className="activity-item d-flex">
-                                        <div className="activite-label">1 day</div>
-                                        <i className='bi bi-circle-fill activity-badge text-info align-self-start'></i>
-                                        <div className="activity-content">
-                                            Tempore autem saepe <a href="#" className="fw-bold text-dark">occaecati voluptatem</a> tempore
+                                        <div className="row mb-3">
+                                            <div className="col-sm-12">
+                                                <input
+                                                    type="text"
+                                                    className="form-control"
+
+                                                    name="degree_program"
+                                                    value={this.state.new_student.degree_program}
+                                                    onChange={this.handleChange}
+                                                    placeholder='Degree Program'
+                                                />
+                                            </div>
                                         </div>
-                                    </div>
-                                    <div className="activity-item d-flex">
-                                        <div className="activite-label">2 days</div>
-                                        <i className='bi bi-circle-fill activity-badge text-warning align-self-start'></i>
-                                        <div className="activity-content">
-                                            Est sit eum reiciendis exercitationem
+                                        <div className="row mb-3">
+                                            <div className="col-sm-12">
+                                                <input
+                                                    type="text"
+                                                    className="form-control"
+
+                                                    name="college"
+                                                    value={this.state.new_student.college}
+                                                    onChange={this.handleChange}
+                                                    placeholder='College'
+                                                />
+                                            </div>
                                         </div>
-                                    </div>
-                                    <div className="activity-item d-flex">
-                                        <div className="activite-label">4 weeks</div>
-                                        <i className='bi bi-circle-fill activity-badge text-muted align-self-start'></i>
-                                        <div className="activity-content">
-                                            Dicta dolorem harum nulla eius. Ut quidem quidem sit quas
+                                        <div className="row mb-3">
+                                            <div className="col-sm-12">
+                                                <input
+                                                    type="text"
+                                                    className="form-control"
+
+                                                    name="degree_level"
+                                                    value={this.state.new_student.degree_level}
+                                                    onChange={this.handleChange}
+                                                    placeholder='Degree Level'
+                                                />
+                                            </div>
                                         </div>
-                                    </div>
+                                        <div className="row mb-3">
+                                            <div className="col-sm-12">
+                                                <select
+                                                    className="form-select"
+                                                    id="graduationStatus"
+                                                    name="graduation_status"
+                                                    value={this.state.new_student.graduation_status}
+                                                    onChange={this.handleChange}
+                                                >
+                                                    <option value="EX">Expected</option>
+                                                    <option value="PP">Postponed</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div className="row mb-3">
+                                            <div className="col-sm-10">
+                                                <button type="submit" className="btn btn-primary">
+                                                    Register
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </form>
                                 </div>
+                            </div>
+                        </div>
+                        <div className="card">
+                            <div className="card-body">
+                                <h5 className="card-title">Register Guest</h5>
+                                <div>
+                                    <form onSubmit={this.handleSubmit}>
+                                        <div className="mb-3">
+                                            <select
+                                                className="form-select"
+                                                id="student"
+                                                name="student"
+                                                value={this.state.status}
+                                                onChange={this.handleChange}
+                                            >
+                                                <option value="">Student</option>
+                                                {(this.state.students != null)?
+                                                (
+                                                    this.state.students.map((student, index)=>{
+                                                        <option key={index} value={student.username}>{student.username}</option>
+                                                    })
+                                                ):(
+                                                    <></>
+                                                )}
+                                            </select>
+                                        </div>
+                                        <div className="mb-3">
+                                            <input
+                                                type="text"
+                                                className="form-control"
+                                                id="name"
+                                                name="name"
+                                                value={this.state.name}
+                                                placeholder='Name'
+                                                onChange={this.handleChange}
+                                            />
+                                        </div>
+                                        <div className="mb-3">
+                                            <select
+                                                className="form-select"
+                                                id="type"
+                                                name="type"
+                                                value={this.state.type}
+                                                onChange={this.handleChange}
+                                            >
+                                                <option value="PRT">Parent</option>
+                                                <option value="VIP">VIP</option>
+                                            </select>
+                                        </div>
+                                        <div className="mb-3">
 
+                                            <select
+                                                className="form-select"
+                                                id="status"
+                                                name="status"
+                                                value={this.state.status}
+                                                onChange={this.handleChange}
+                                            >
+                                                <option value="EX">Expected</option>
+                                                <option value="PP">Postponed</option>
+                                            </select>
+                                        </div>
+                                        <button type="submit" className="btn btn-primary">
+                                            Register
+                                        </button>
+                                    </form>
+
+                                </div>
                             </div>
                         </div>
                     </div>

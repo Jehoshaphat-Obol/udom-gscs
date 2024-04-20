@@ -1,0 +1,79 @@
+<div className="datatable-wrapper datatable-loading no-footer sortable searchable fixed-columns">
+    <div className="datatable-top">
+        <div className="datatable-dropdown">
+            <label>
+                <select className="datatable-selector">
+                    <option value="5">5</option>
+                    <option value="10" selected="">10</option>
+                    <option value="15">15</option>
+                    <option value="20">20</option>
+                    <option value="25">25</option>
+                </select> entries per page
+            </label>
+        </div>
+        <div className="datatable-search">
+            <input className="datatable-input" placeholder="Search..." type="search" title="Search within table">
+        </div>
+    </div>
+    <div className="datatable-container">
+        <table className="table table-borderless datatable datatable-table">
+            <thead>
+                <tr>
+                    <th data-sortable="true" style="width: 14.698795180722893%;"><button
+                            className="datatable-sorter">#</button></th>
+                    <th data-sortable="true" style="width: 24.096385542168676%;"><button
+                            className="datatable-sorter">Customer</button></th>
+                    <th data-sortable="true" aria-sort="descending" className="datatable-descending"
+                        style="width: 24.819277108433734%;"><button className="datatable-sorter">Product</button></th>
+                    <th data-sortable="true" style="width: 16.14457831325301%;"><button
+                            className="datatable-sorter">Price</button></th>
+                    <th data-sortable="true" style="width: 20.240963855421686%;"><button
+                            className="datatable-sorter">Status</button></th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr data-index="0">
+                    <td><a href="#">#2644</a></td>
+                    <td>Angus Grady</td>
+                    <td><a href="#" className="text-primar">Ut voluptatem id earum et</a></td>
+                    <td>$67</td>
+                    <td><span className="badge bg-danger">Rejected</span></td>
+                </tr>
+                <tr data-index="1">
+                    <td><a href="#">#2644</a></td>
+                    <td>Raheem Lehner</td>
+                    <td><a href="#" className="text-primary">Sunt similique distinctio</a></td>
+                    <td>$165</td>
+                    <td><span className="badge bg-success">Approved</span></td>
+                </tr>
+                <tr data-index="2">
+                    <td><a href="#">#2147</a></td>
+                    <td>Bridie Kessler</td>
+                    <td><a href="#" className="text-primary">Blanditiis dolor omnis similique</a></td>
+                    <td>$47</td>
+                    <td><span className="badge bg-warning">Pending</span></td>
+                </tr>
+                <tr data-index="3">
+                    <td><a href="#">#2049</a></td>
+                    <td>Ashleigh Langosh</td>
+                    <td><a href="#" className="text-primary">At recusandae consectetur</a></td>
+                    <td>$147</td>
+                    <td><span className="badge bg-success">Approved</span></td>
+                </tr>
+                <tr data-index="4">
+                    <td><a href="#">#2457</a></td>
+                    <td>Brandon Jacob</td>
+                    <td><a href="#" className="text-primary">At praesentium minu</a></td>
+                    <td>$64</td>
+                    <td><span className="badge bg-success">Approved</span></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    <div className="datatable-bottom">
+        <div className="datatable-info">Showing 1 to 5 of 5 entries</div>
+        <nav className="datatable-pagination">
+            <ul className="datatable-pagination-list"></ul>
+        </nav>
+    </div>
+</div>
