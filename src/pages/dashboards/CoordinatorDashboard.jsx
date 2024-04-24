@@ -26,9 +26,16 @@ export default class CoordinatorDashboard extends Component {
                 degree_level: '',
                 college: '',
             },
+            "new_guest":{
+                "student": "",
+                "name": "",
+                "type": "PRT",
+                "status": "EX"
+            },
         }
 
         this.handleStudentRegistration = this.handleStudentRegistration.bind(this)
+        this.handleGuestRegistration = this.handleGuestRegistration.bind(this)
     }
     componentDidMount(){
         // get students
@@ -99,6 +106,19 @@ export default class CoordinatorDashboard extends Component {
         }), ()=>{
         });
     };
+
+
+    handleGuestChange = (e) => {
+        const { name, value } = e.target;
+
+        this.setState((prevState) => ({
+            new_guest: {
+                ...prevState.new_guest,
+                [name]: value,
+            }
+        }), ()=>{
+        });
+    };
     handleStudentChange = (e) => {
         const {name, value} = e.target;
 
@@ -142,6 +162,37 @@ export default class CoordinatorDashboard extends Component {
             })
     }
 
+
+    reloadGuestsTable(){
+        // get guests
+        axios.get(apiUrl + "guests/")
+        .then(response => {
+            const guests = response.data;
+            const expected = guests.filter((guest)=>{
+                return guest.status = "EX"
+            })
+
+            this.setState(prevState => ({
+                guests_count: {
+                    ...prevState.guests_count,
+                    expected: expected.length,
+                    postponed: guests.length - expected.length,
+                },
+                guests
+            }),
+            ()=>{
+            }
+            )
+            setTimeout(() => {
+                const guests_table = document.querySelector('.guests-datatable')
+                const guests_datatable = new DataTable(guests_table)
+            }, 200)
+        })
+        .catch(error=>{
+            console.log(error);
+        })
+    }
+
     handleStudentRegistration(e){
         e.preventDefault();
         axios.post(apiUrl + 'students/', this.state.new_student)
@@ -165,6 +216,30 @@ export default class CoordinatorDashboard extends Component {
             }
             ))
             this.reloadStudentsTable();
+        })
+        .catch(error=>{
+            console.log(error)
+        })
+
+    }
+
+
+    handleGuestRegistration(e){
+        e.preventDefault();
+        axios.post(apiUrl + 'guests/', this.state.new_guest)
+        .then(response => {
+            //clear the form
+            this.setState((prevState)=>({
+                new_guest: {
+                    ...prevState.new_guest,
+                    student: "",
+                    name: "", 
+                    type: "PRT",
+                    status: "EX",
+                },
+            }
+            ))
+            this.reloadGuestsTable();
         })
         .catch(error=>{
             console.log(error)
@@ -263,6 +338,7 @@ export default class CoordinatorDashboard extends Component {
                                 </div>
                             </div>
 
+                            {/* registered students table */}
                             <div className="col-12">
                                 <div className="card recent-sales overflow-auto">
 
@@ -329,6 +405,8 @@ export default class CoordinatorDashboard extends Component {
 
                                 </div>
                             </div>
+
+                            {/*registerd guests table*/}
                             <div className="col-12">
                                 <div className="card recent-sales overflow-auto">
 
@@ -394,6 +472,7 @@ export default class CoordinatorDashboard extends Component {
                     </div>
 
                     <div className="col-lg-4">
+                        {/* Students registration form*/}
                         <div className="card">
                             <div className="card-body">
                                 <h5 className="card-title">Register Student</h5>
@@ -528,24 +607,26 @@ export default class CoordinatorDashboard extends Component {
                                 </div>
                             </div>
                         </div>
+
+                        {/* Guest Registration form */}
                         <div className="card">
                             <div className="card-body">
                                 <h5 className="card-title">Register Guest</h5>
                                 <div>
-                                    <form onSubmit={this.handleSubmit}>
+                                    <form onSubmit={this.handleGuestRegistration}>
                                         <div className="mb-3">
                                             <select
                                                 className="form-select"
                                                 id="student"
                                                 name="student"
-                                                value={this.state.status}
-                                                onChange={this.handleChange}
+                                                value={this.state.new_guest.student}
+                                                onChange={this.handleGuestChange}
                                             >
                                                 <option value="">Student</option>
                                                 {(this.state.students != null)?
                                                 (
                                                     this.state.students.map((student, index)=>{
-                                                        <option key={index} value={student.username}>{student.username}</option>
+                                                        return (<option key={index} value={student.user.username}>{student.user.username}</option>)
                                                     })
                                                 ):(
                                                     <></>
@@ -558,9 +639,9 @@ export default class CoordinatorDashboard extends Component {
                                                 className="form-control"
                                                 id="name"
                                                 name="name"
-                                                value={this.state.name}
+                                                value={this.state.new_guest.name}
                                                 placeholder='Name'
-                                                onChange={this.handleChange}
+                                                onChange={this.handleGuestChange}
                                             />
                                         </div>
                                         <div className="mb-3">
@@ -568,8 +649,8 @@ export default class CoordinatorDashboard extends Component {
                                                 className="form-select"
                                                 id="type"
                                                 name="type"
-                                                value={this.state.type}
-                                                onChange={this.handleChange}
+                                                value={this.state.new_guest.type}
+                                                onChange={this.handleGuestChange}
                                             >
                                                 <option value="PRT">Parent</option>
                                                 <option value="VIP">VIP</option>
@@ -581,8 +662,8 @@ export default class CoordinatorDashboard extends Component {
                                                 className="form-select"
                                                 id="status"
                                                 name="status"
-                                                value={this.state.status}
-                                                onChange={this.handleChange}
+                                                value={this.state.new_guest.status}
+                                                onChange={this.handleGuestChange}
                                             >
                                                 <option value="EX">Expected</option>
                                                 <option value="PP">Postponed</option>
