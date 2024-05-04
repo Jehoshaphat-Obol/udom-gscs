@@ -8,13 +8,13 @@
 }
 
 .cluster{
-    margin: 4rem 1rem;
+    margin: 4rem 2rem;
     pointer-events: none;
     touch-action: none;
 }
 
 .cluster .row{
-    margin: 0.5rem;
+    margin: 1.5rem;
     flex-wrap: nowrap;
 }
 
@@ -28,12 +28,16 @@
 
 .right{
     justify-content: end;
+    transform: rotateZ(5deg);
+
 }
 
 .center{
     justify-content: center;
+    transform: translateY(3.6rem);
 }
 
 .left{
     justify-content: start;
+    transform: rotateZ(-5deg);
 }

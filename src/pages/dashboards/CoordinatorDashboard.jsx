@@ -41,6 +41,9 @@ export default class CoordinatorDashboard extends Component {
         // get students
         axios.get(apiUrl + 'students/')
         .then(response => {
+            if (response.status !== 200) {
+                throw new Error('Failed to fetch data');
+            }
             const students = response.data;
             const graduates = students.filter((student)=>{
                 return student.graduation_status == "EX"
@@ -59,7 +62,7 @@ export default class CoordinatorDashboard extends Component {
             setTimeout(() =>{
                 const students_table = document.querySelector('.students-datatable');
                 const students_datatable = new DataTable(students_table)
-            }, 100)
+            }, 0)
 
         })
         .catch(error => {
@@ -69,6 +72,9 @@ export default class CoordinatorDashboard extends Component {
         // get guests
         axios.get(apiUrl + "guests/")
         .then(response => {
+            if (response.status !== 200) {
+                throw new Error('Failed to fetch data');
+            }
             const guests = response.data;
             const expected = guests.filter((guest)=>{
                 return guest.status = "EX"
@@ -88,7 +94,7 @@ export default class CoordinatorDashboard extends Component {
             setTimeout(() => {
                 const guests_table = document.querySelector('.guests-datatable')
                 const guests_datatable = new DataTable(guests_table)
-            }, 200)
+            }, 0)
         })
         .catch(error=>{
             console.log(error);
@@ -428,7 +434,7 @@ export default class CoordinatorDashboard extends Component {
                                         <h5 className="card-title">Guests <span>| All</span></h5>
 
 
-                                        {(this.state.students == null) ? (
+                                        {(this.state.guests == null) ? (
                                             <div className="spinner-border text-primary d-flex justify-content-center" role="status">
                                                 <span className="visually-hidden">Loading...</span>
                                             </div>
