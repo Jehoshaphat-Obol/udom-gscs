@@ -9,7 +9,7 @@
 
 .cluster{
     margin: 4rem 2rem;
-    pointer-events: none;
+    /* pointer-events: none; */
     touch-action: none;
 }
 
@@ -22,8 +22,13 @@
     width: 48px;
     aspect-ratio: 1;
     border-radius: 4px;
-    border: solid 4px #333;
+    border: solid 3px #333;
     margin: 0.25rem;
+    cursor: pointer;
+}
+
+.cluster .row .seat:hover{
+    border: solid 8px #333;
 }
 
 .right{
@@ -40,4 +45,22 @@
 .left{
     justify-content: start;
     transform: rotateZ(-5deg);
+}
+
+.tooltip-inner {
+    background-color: #2f4fff !important;
+    box-shadow: 0px 0px 4px black;
+    opacity: 1 !important;
+}
+.tooltip.bs-tooltip-right .tooltip-arrow::before {
+    border-right-color: #2f4fff !important;
+}
+.tooltip.bs-tooltip-left .tooltip-arrow::before {
+    border-left-color: #2f4fff !important;
+}
+.tooltip.bs-tooltip-bottom .tooltip-arrow::before {
+    border-bottom-color: #2f4fff !important;
+}
+.tooltip.bs-tooltip-top .tooltip-arrow::before {
+    border-top-color: #2f4fff !important;
 }

@@ -29,6 +29,8 @@ export default class CoordinatorDashboard extends Component {
             "new_guest":{
                 "student": "",
                 "name": "",
+                "user": {},
+                "password": "",
                 "type": "PRT",
                 "status": "EX"
             },
@@ -77,8 +79,9 @@ export default class CoordinatorDashboard extends Component {
             }
             const guests = response.data;
             const expected = guests.filter((guest)=>{
-                return guest.status = "EX"
+                return guest.status == "EX"
             })
+
 
             this.setState(prevState => ({
                 guests_count: {
@@ -121,6 +124,11 @@ export default class CoordinatorDashboard extends Component {
             new_guest: {
                 ...prevState.new_guest,
                 [name]: value,
+                ['user']: {
+                    'username' : (name === 'name')? value: prevState.new_guest.name,
+                    'password' : (name === 'password')? value: prevState.new_guest.password
+                }
+
             }
         }), ()=>{
         });
@@ -239,7 +247,8 @@ export default class CoordinatorDashboard extends Component {
                 new_guest: {
                     ...prevState.new_guest,
                     student: "",
-                    name: "", 
+                    name: "",
+                    password: "", 
                     type: "PRT",
                     status: "EX",
                 },
@@ -456,7 +465,7 @@ export default class CoordinatorDashboard extends Component {
                                                                     <td>{guest.name}</td>
                                                                     <td>{guest.type}</td>
                                                                     {
-                                                                        (guest.status == "EX") ? (
+                                                                        (guest.status === "EX") ? (
                                                                             <td><span className="badge bg-success">Expected</span></td>
                                                                         ) : (
                                                                             <td><span className="badge bg-danger">Postponed</span></td>
@@ -643,10 +652,20 @@ export default class CoordinatorDashboard extends Component {
                                             <input
                                                 type="text"
                                                 className="form-control"
-                                                id="name"
                                                 name="name"
                                                 value={this.state.new_guest.name}
                                                 placeholder='Name'
+                                                onChange={this.handleGuestChange}
+                                            />
+                                        </div>
+                                        <div className="mb-3">
+                                            <input
+                                                type="password"
+                                                className="form-control"
+                                                id="name"
+                                                name="password"
+                                                value={this.state.new_guest.password}
+                                                placeholder='password'
                                                 onChange={this.handleGuestChange}
                                             />
                                         </div>

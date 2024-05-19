@@ -6,8 +6,8 @@ export default class Home extends Component {
   render() {
     return (
       <>
-        {/* <StudentDashboard /> */}
         <CoordinatorDashboard />
+        <StudentDashboard />
       </>
     )
   }

@@ -2,13 +2,15 @@ import React, { Component } from 'react'
 import './Chimwaga.css';
 const apiUrl = import.meta.env.VITE_API_URL;
 import axios from 'axios'
+import { DataTable } from 'simple-datatables';
 
 
 function generateSeats(row, id = "") {
     const seats = [];
     for (let i = 1; i <= row.number_of_seats; i++) {
         const newId = id + `-C${i}`;
-        seats.push(<div className='seat' key={i} id={newId}></div>);
+        // const response = await axios.post(apiUrl + 'seats/', {row: row.id, seat_number: i, ticket: newId});
+        seats.push(<div className={`seat ${newId}`} key={i} id={newId} data-toggle="tooltip" data-placement="top" title={`Seat: ${newId}`}></div>);
     }
 
     return seats
@@ -24,13 +26,22 @@ export default class Chimwaga extends Component {
             lastX: null,
             lastY: null,
             unassignedStudents: null,
+            unassignedGuests: null,
             assignedStudents: null,
+            selected: [],
+            selectedGuests: [],
             rows: [],
+            tickets: [],
             form: {
                 from: "",
                 to: "",
             },
+            seating_plan: [],
         }
+
+        this.handleStudentArrangement = this.handleStudentArrangement.bind(this);
+        this.handleGuestArrangement = this.handleGuestArrangement.bind(this)
+
     }
 
     handleWheel = (e) => {
@@ -98,10 +109,13 @@ export default class Chimwaga extends Component {
             const seats = document.querySelectorAll('.seat')
 
             seats.forEach(seat => {
-                seat.style = "background: transparent";
+                if (!seat.classList.contains('taken')) {
+                    seat.style = "background: transparent";
+                }
             })
 
             if (from) {
+                const tickets = [];
                 const seat = document.querySelector(`#${from}`);
                 if (seat) {
                     seat.style = "background: blue;"
@@ -122,12 +136,28 @@ export default class Chimwaga extends Component {
                         }
                     })
 
-                    console.log(fromIndex, toIndex);
                     if (fromIndex <= toIndex) {
                         for (let i = fromIndex; i <= toIndex; i++) {
-                            seats[i].style = "background: blue;"
+                            if (!seats[i].classList.contains('taken')) {
+                                seats[i].style = "background: blue;"
+                                tickets.push(seats[i].id);
+                            }
                         }
+                        this.setState((prevState) => {
+                            return {
+                                ...prevState,
+                                tickets
+                            }
+                        })
+                    } else {
+                        document.querySelectorAll('.taken.seat').forEach((chair) => {
+                            chair.style = 'background: orange;'
+                        })
                     }
+                } else {
+                    document.querySelectorAll('.taken.seat').forEach((chair) => {
+                        chair.style = 'background: orange;'
+                    })
                 }
             }
         })
@@ -148,10 +178,13 @@ export default class Chimwaga extends Component {
 
 
             seats.forEach(seat => {
-                seat.style = "background: transparent";
+                if (!seat.classList.contains('taken')) {
+                    seat.style = "background: transparent";
+                }
             })
 
             if (to && this.state.form.from) {
+                const tickets = [];
                 let fromIndex, toIndex;
                 seats.forEach((seat, index) => {
                     if (seat.id == `${this.state.form.from}`) {
@@ -162,14 +195,80 @@ export default class Chimwaga extends Component {
                     }
                 })
 
-                console.log(fromIndex, toIndex);
                 if (fromIndex <= toIndex) {
                     for (let i = fromIndex; i <= toIndex; i++) {
-                        seats[i].style = "background: blue;"
+                        if (!seats[i].classList.contains('taken')) {
+                            seats[i].style = "background: blue;"
+                            tickets.push(seats[i].id);
+                        }
                     }
+                    this.setState((prevState) => {
+                        return {
+                            ...prevState,
+                            tickets
+                        }
+                    })
+                } else {
+                    document.querySelectorAll('.taken.seat').forEach((chair) => {
+                        chair.style = 'background: orange;'
+                    })
                 }
+            } else {
+                document.querySelectorAll('.taken.seat').forEach((chair) => {
+                    chair.style = 'background: orange;'
+                })
             }
         })
+    }
+
+    handleStudentArrangement() {
+        const seating_plan = [];
+        const total_selection = this.state.selected.length;
+        this.state.tickets.forEach((ticket, index) => {
+            if (index <= total_selection - 1) {
+                seating_plan.push({
+                    username: this.state.selected[index].user.username,
+                    ticket,
+                })
+            }
+        });
+
+        if (total_selection > 0 && this.state.tickets.length > 0) {
+            axios.post(apiUrl + 'batch_student_plan/', seating_plan)
+                .then(response => {
+                    console.log(response)
+                    window.location.href = '/seats/'
+                })
+                .catch(error => {
+                    console.log(error)
+                })
+            console.log(seating_plan);
+        }
+    }
+
+    handleGuestArrangement() {
+        const seating_plan = [];
+        const total_selection = this.state.selectedGuests.length;
+        this.state.tickets.forEach((ticket, index) => {
+            if (index <= total_selection - 1) {
+                seating_plan.push({
+                    username: this.state.selectedGuests[index].user.username,
+                    ticket,
+                })
+            }
+        });
+
+        if (total_selection > 0 && this.state.tickets.length > 0) {
+            axios.post(apiUrl + 'batch_student_plan/', seating_plan)
+                .then(response => {
+                    console.log(response)
+                    window.location.href = '/seats/'
+                })
+                .catch(error => {
+                    console.log(error)
+                })
+            console.log(seating_plan);
+        }
     }
 
     componentDidMount() {
@@ -177,17 +276,66 @@ export default class Chimwaga extends Component {
         this.container.addEventListener('wheel', this.handleWheel, { passive: false });
         this.container.addEventListener('touchmove', this.handlePinch, { passive: false });
 
-        axios.get(apiUrl + 'students/')
+        axios.get(apiUrl + 'unassigned_students/')
             .then(response => {
                 this.setState(prevState => ({
                     ...prevState,
-                    assignedStudents: response.data.filter(student => {
-                        return student.graduation_status == "EX"
-                    }),
                     unassignedStudents: response.data.filter(student => {
                         return student.graduation_status == "EX"
                     }),
-                }))
+                    selected: response.data.filter(student => {
+                        return student.graduation_status == "EX"
+                    })
+                    ,
+                }), () => {
+                    console.log(this.state.selected)
+                    const students_datatable = new DataTable('.students-datatable');
+                    students_datatable.on('datatable.search', (query, matched) => {
+                        const selection = []
+                        matched.forEach(item => {
+                            selection.push(this.state.unassignedStudents[item])
+                        })
+                        this.setState(prevState => ({
+                            ...prevState,
+                            selected: selection,
+                        }), () => {
+                            console.log(this.state.selected)
+                        })
+                    })
+                })
+            })
+            .catch(error => {
+                console.log(error)
+            })
+
+        
+            axios.get(apiUrl + 'unassigned_guests/')
+            .then(response => {
+                this.setState(prevState => ({
+                    ...prevState,
+                    unassignedGuests: response.data.filter(guest => {
+                        return guest.status == "EX"
+                    }),
+                    selectedGuests: response.data.filter(guest => {
+                        return guest.status == "EX"
+                    })
+                    ,
+                }), () => {
+                    console.log(this.state.selectedGuests)
+                    const guests_datatable = new DataTable('.guests-datatable');
+                    guests_datatable.on('datatable.search', (query, matched) => {
+                        const selection = []
+                        matched.forEach(item => {
+                            selection.push(this.state.unassignedGuests[item])
+                        })
+                        this.setState(prevState => ({
+                            ...prevState,
+                            selectedGuests: selection,
+                        }), () => {
+                            console.log(this.state.selectedGuests)
+                        })
+                    })
+                })
             })
             .catch(error => {
                 console.log(error)
@@ -198,11 +346,46 @@ export default class Chimwaga extends Component {
                 this.setState(prevState => ({
                     ...prevState,
                     rows: response.data,
-                }))
+                }), () => {
+                    // const rows = this.state.rows;
+                    // let sum = 0;
+                    // rows.forEach((row) => {
+                    //     sum += row.number_of_seats;
+                    // })
+                }, () => {
+
+                })
+                axios.get(apiUrl + 'seating_plan/')
+                    .then((response) => {
+                        this.setState((prevState) => ({
+                            ...prevState,
+                            seating_plan: response.data.filter((seat) => {
+                                return seat.user_details != null;
+                            }),
+                        }), () => {
+                            const seating_plan_datatable = new DataTable('.seatingplan-datatable');
+
+                            this.state.seating_plan.forEach((seat, index) => {
+                                const chair = document.querySelector(`.seat.${seat.user_details.ticket}#${seat.user_details.ticket}`);
+                                chair.classList.add('taken');
+                                chair.style = 'background: orange'
+
+                                if (seat.user_details.type == "student") {
+                                    chair.title = `Seat: ${seat.user_details.ticket}, ${seat.user_details.type}, ${seat.user_details.name}, ${seat.user_details.college}, ${seat.user_details.degree_program}, ${seat.user_details.degree_level}`
+                                } else if (seat.user_details.type == "guest") {
+                                    chair.title = `Seat: ${seat.user_details.ticket}, ${seat.user_details.guest_type}, ${seat.user_details.name}, ${seat.user_details.student}`
+                                }
+                            })
+                        });
+                    })
+                    .catch((error) => {
+                        console.log(error)
+                    })
             })
             .catch((error) => {
                 console.log(error)
             })
+
     }
     render() {
         const { scale, translateX, translateY, lastX, lastY } = this.state;
@@ -218,6 +401,9 @@ export default class Chimwaga extends Component {
                                 </li>
                                 <li className="nav-item" role="presentation">
                                     <button className="nav-link" id="profile-tab" data-bs-toggle="tab" data-bs-target="#bordered-profile" type="button" role="tab" aria-controls="profile" aria-selected="false">Unassigned Students</button>
+                                </li>
+                                <li className="nav-item" role="presentation">
+                                    <button className="nav-link" id="profile-tab" data-bs-toggle="tab" data-bs-target="#bordered-guests" type="button" role="tab" aria-controls="guests" aria-selected="false">Unassigned Guests</button>
                                 </li>
                                 <li className="nav-item" role="presentation">
                                     <button className="nav-link" id="contact-tab" data-bs-toggle="tab" data-bs-target="#bordered-contact" type="button" role="tab" aria-controls="contact" aria-selected="false" tabIndex="-1">Seating Plan</button>
@@ -388,68 +574,101 @@ export default class Chimwaga extends Component {
                                                         <th scope="col">Collage</th>
                                                         <th scope="col">Degree Level</th>
                                                         <th scope="col">Program</th>
-                                                        <th scope="col">Status</th>
                                                     </tr>
                                                 </thead>
                                                 <tbody>
                                                     {
                                                         this.state.unassignedStudents.map((student) => (
                                                             <tr key={student.id}>
-                                                                <th scope="row"><a href="#">{student.user.username}</a></th>
+                                                                <td scope="row"><a href="#">{student.user.username}</a></td>
                                                                 <td>{student.user.first_name + " " + student.user.last_name}</td>
-                                                                <td><a href="#" className="text-primary">{student.college}</a></td>
+                                                                <td><a href="#" className="text-primary">{student.college.toUpperCase()}</a></td>
                                                                 <td>{student.degree_level}</td>
                                                                 <td>{student.degree_program}</td>
-                                                                {
-                                                                    (student.graduation_status == "EX") ? (
-                                                                        <td><span className="badge bg-success">Expected</span></td>
-                                                                    ) : (
-                                                                        <td><span className="badge bg-danger">Postponed</span></td>
-                                                                    )
-                                                                }
                                                             </tr>
                                                         ))
                                                     }
                                                 </tbody>
                                             </table>
+                                            <div className='d-flex flex-row-reverse'>
+                                                <button type="button" className="btn btn-primary" onClick={this.handleStudentArrangement}>
+                                                    Arrange Students
+                                                </button>
+                                            </div>
                                         </>
                                     )}
                                 </div>
-                                <div className="tab-pane fade" id="bordered-contact" role="tabpanel" aria-labelledby="contact-tab">
+                                <div className="tab-pane fade" id="bordered-guests" role="tabpanel" aria-labelledby="profile-tab">
 
-                                    {(this.state.assignedStudents == null) ? (
+                                    {(this.state.unassignedGuests == null) ? (
                                         <div className="spinner-border text-primary d-flex justify-content-center" role="status">
                                             <span className="visually-hidden">Loading...</span>
                                         </div>
                                     ) : (
                                         <>
-                                            <table className="table table-borderless students-datatable">
+                                            <table className="table table-borderless guests-datatable">
                                                 <thead>
                                                     <tr>
-                                                        <th scope="col">Reg. No</th>
                                                         <th scope="col">Name</th>
-                                                        <th scope="col">Collage</th>
-                                                        <th scope="col">Degree Level</th>
-                                                        <th scope="col">Program</th>
+                                                        <th scope="col">Student</th>
+                                                        <th scope="col">Type</th>
                                                         <th scope="col">Status</th>
                                                     </tr>
                                                 </thead>
                                                 <tbody>
                                                     {
-                                                        this.state.assignedStudents.map((student) => (
-                                                            <tr key={student.id}>
-                                                                <th scope="row"><a href="#">{student.user.username}</a></th>
-                                                                <td>{student.user.first_name + " " + student.user.last_name}</td>
-                                                                <td><a href="#" className="text-primary">{student.college}</a></td>
-                                                                <td>{student.degree_level}</td>
-                                                                <td>{student.degree_program}</td>
+                                                        this.state.unassignedGuests.map((guest) => (
+                                                            <tr key={guest.id}>
+                                                                <td scope="row"><a href="#">{guest.name}</a></td>
+                                                                <td scope="row">{guest.student}</td>
+                                                                <td scope="row">{guest.type}</td>
+                                                                <td scope="row">{guest.status}</td>
+                                                            </tr>
+                                                        ))
+                                                    }
+                                                </tbody>
+                                            </table>
+                                            <div className='d-flex flex-row-reverse'>
+                                                <button type="button" className="btn btn-primary" onClick={this.handleGuestArrangement}>
+                                                    Arrange Guests
+                                                </button>
+                                            </div>
+                                        </>
+                                    )}
+                                </div>
+                                <div className="tab-pane fade" id="bordered-contact" role="tabpanel" aria-labelledby="contact-tab">
+
+                                    {(this.state.seating_plan == null) ? (
+                                        <div className="spinner-border text-primary d-flex justify-content-center" role="status">
+                                            <span className="visually-hidden">Loading...</span>
+                                        </div>
+                                    ) : (
+                                        <>
+                                            <table className="table table-borderless seatingplan-datatable">
+                                                <thead>
+                                                    <tr>
+                                                        <th scope="col">Name</th>
+                                                        <th scope="col">Type</th>
+                                                        <th scope="col">Status</th>
+                                                        <th scope="col">Ticket</th>
+                                                        <th scope="col">Student Id</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    {
+                                                        this.state.seating_plan.map((seat, index) => (
+                                                            <tr key={index}>
+                                                                <td>{seat.user_details.name}</td>
+                                                                <td>{seat.user_details.type}</td>
                                                                 {
-                                                                    (student.graduation_status == "EX") ? (
+                                                                    (seat.user_details.status === "EX") ? (
                                                                         <td><span className="badge bg-success">Expected</span></td>
                                                                     ) : (
                                                                         <td><span className="badge bg-danger">Postponed</span></td>
                                                                     )
                                                                 }
+                                                                <td>{seat.user_details.ticket}</td>
+                                                                <td>{seat.user_details.student}</td>
                                                             </tr>
                                                         ))
                                                     }
@@ -466,7 +685,7 @@ export default class Chimwaga extends Component {
                 <div className="col-lg-4">
                     <div className="card">
                         <div className="card-body">
-                            <h5 className="card-title">Assign Seats</h5>
+                            <h5 className="card-title">Assign Seats - {this.state.tickets.length} Seats Selected</h5>
                             <div>
                                 <form onSubmit={() => (false)}>
                                     <div className="mb-3">
@@ -474,31 +693,6 @@ export default class Chimwaga extends Component {
                                     </div>
                                     <div className="mb-3">
                                         <input type="text" placeholder="To" className="form-control" onChange={this.handleToChange} value={this.state.form.to} />
-                                    </div>
-                                    <div className="mb-3">
-                                        <select className='form-select'>
-                                            <option value="" defaultValue={true}>Criterion 1</option>
-                                            <option value="seat-1">Collage</option>
-                                            <option value="degree">Degree Level</option>
-                                            <option value="program">Program</option>
-                                        </select>
-                                    </div>
-                                    <div className="mb-3">
-                                        <select className='form-select'>
-                                            <option value="" defaultValue={true}>Criterion 2</option>
-                                            <option value="seat-1">Collage</option>
-                                            <option value="degree">Degree Level</option>
-                                            <option value="program">Program</option>
-                                        </select>
-                                    </div>
-
-                                    <div className="mb-3">
-                                        <select className='form-select'>
-                                            <option value="" defaultValue={true}>Criterion 3</option>
-                                            <option value="seat-1">Collage</option>
-                                            <option value="degree">Degree Level</option>
-                                            <option value="program">Program</option>
-                                        </select>
                                     </div>
                                 </form>
                             </div>
