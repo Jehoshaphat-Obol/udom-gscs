@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route, Outlet } from 'react-router-dom'
+import { BrowserRouter, Routes, Route, Outlet, Navigate } from 'react-router-dom'
 import Header from './components/Header'
 import Home from './pages/home/Home'
 import SideBar from './components/SideBar'
@@ -6,9 +6,10 @@ import Error404 from './pages/error/Error404'
 import Seats from './pages/seats/Seats'
 import Timetable from './pages/timetable/Timetable'
 import Report from './pages/report/Report'
+import Signin from './pages/signin/Signin'
+import withAuth from './HOC/withAuth'
 
-
-const SytemLayout = () => {
+const SystemLayout = () => {
   return (
     <>
       <header id="header" className="header fixed-top d-flex align-items-center">
@@ -25,14 +26,16 @@ const SytemLayout = () => {
   )
 }
 
+const ProtectedSystemLayout = withAuth(SystemLayout)
+
 function App() {
   return (
     <>
       <BrowserRouter>
         <Routes>
-          <Route path="/signin"></Route>
-          <Route path="/" element={<SytemLayout />}>
-            <Route path='/' element={<Home />} />
+          <Route path="/auth/" element={<Signin />} />
+          <Route path="/" element={<ProtectedSystemLayout />}>
+            <Route index element={<Home />} />
             <Route path='/seats' element={<Seats />} />
             <Route path='/timetable' element={<Timetable />} />
             <Route path='/report' element={<Report />} />

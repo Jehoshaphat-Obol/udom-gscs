@@ -1,6 +1,7 @@
 import React, { Component } from 'react'
 import logo from '../assets/img/logo.png'
 import profile from '../assets/img/profile-img.png'
+import authService from '../services/authService';
 
 export default class Header extends Component {
     constructor(props){
@@ -228,10 +229,10 @@ export default class Header extends Component {
                             </li>
 
                             <li>
-                                <a className="dropdown-item d-flex align-items-center" href="#">
+                                <span className="dropdown-item d-flex align-items-center" style={{cursor: 'pointer'}} onClick={authService.logout}>
                                     <i className="bi bi-box-arrow-right"></i>
                                     <span>Sign Out</span>
-                                </a>
+                                </span>
                             </li>
 
                         </ul>

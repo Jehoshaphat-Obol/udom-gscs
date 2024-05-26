@@ -1,6 +1,6 @@
 import React, { Component } from 'react'
 import { Link } from 'react-router-dom'
-import axios from 'axios'
+import axios from '../../axiosInstance'
 import { DataTable } from 'simple-datatables';
 
 const apiUrl = import.meta.env.VITE_API_URL;

@@ -1,6 +1,6 @@
 import { Component } from 'react'
 import { Link } from 'react-router-dom'
-import axios from 'axios'
+import axios from '../../axiosInstance'
 const apiUrl = import.meta.env.VITE_API_URL;
 
 export default class Timetable extends Component {

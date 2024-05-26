@@ -7,7 +7,7 @@ export default class Home extends Component {
     return (
       <>
         <CoordinatorDashboard />
-        <StudentDashboard />
+        {/* <StudentDashboard /> */}
       </>
     )
   }
