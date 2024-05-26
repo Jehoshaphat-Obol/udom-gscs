@@ -40,6 +40,7 @@ function App() {
             <Route path='/timetable' element={<Timetable />} />
             <Route path='/report' element={<Report />} />
           </Route>
+          <Route path="/error" element={<Error404 />} />
           <Route path="*" element={<Error404 />} />
         </Routes>
       </BrowserRouter>

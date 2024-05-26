@@ -9,7 +9,6 @@ const withAuth = (Component) => {
     if (!currentUser) {
       return <Navigate to="/auth/" />;
     }
-
     return <Component {...props} />;
   };
 };

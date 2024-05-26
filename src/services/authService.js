@@ -1,5 +1,5 @@
 import axios from 'axios';
-
+import {jwtDecode} from 'jwt-decode';
 const apiUrl = import.meta.env.VITE_API_URL;
 
 const login = (username, password) => {
@@ -9,7 +9,13 @@ const login = (username, password) => {
     })
     .then(response => {
         if(response.data.access){
-            localStorage.setItem('user', JSON.stringify(response.data));
+            const decodedToken = jwtDecode(response.data.access);
+            const user = {
+                access: response.data.access,
+                refresh: response.data.refresh,
+                groups: decodedToken.groups,
+            };
+            localStorage.setItem('user', JSON.stringify(user));
         }
         return response.data;
     })

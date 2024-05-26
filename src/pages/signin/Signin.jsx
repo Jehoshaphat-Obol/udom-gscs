@@ -12,7 +12,6 @@ export default class Signin extends Component {
       message: {},
       mainMessage: "",
     }
-
     this.handleInputChange = this.handleInputChange.bind(this);
     this.handleLogin = this.handleLogin.bind(this);
   }
@@ -57,7 +56,11 @@ export default class Signin extends Component {
       }
     })
   }
+
+  componentDidMount(){
+  }
   render() {
+    localStorage.removeItem('user');
     const { username, password, loading, message, mainMessage } = this.state;
     return (
       <main>
