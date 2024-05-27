@@ -1,9 +1,31 @@
 import React, { Component } from 'react'
 import { Link } from 'react-router-dom'
-import Chimwaga from './Chimwaga'
-
+import ChimwagaCoordinator from './ChimwagaCoordinator'
+import ChimwagaStudent from './ChimwagaStudent'
+import ChimwagaGuest from './ChimwagaGuest'
+import authService from '../../services/authService'
 export default class Seats extends Component {
+
+  getSeatingPlan() {
+    const currentUser = authService.getCurrentUser();
+    
+    // Handle the case where currentUser might be null
+    if (!currentUser || !currentUser.groups) {
+      return <></>;
+    }
+
+    if (currentUser.groups.includes('coordinator')) {
+      return <ChimwagaCoordinator />;
+    } else if (currentUser.groups.includes('student')) {
+      return <ChimwagaStudent />;
+    } else if (currentUser.groups.includes('guest')) {
+      return <ChimwagaGuest />;
+    } else {
+      return <></>;
+    }
+  }
   render() {
+    const SeatingPlan = this.getSeatingPlan()
     return (
       <>
         <div className="pagetitle">
@@ -15,7 +37,7 @@ export default class Seats extends Component {
             </ol>
           </nav>
         </div>
-        <Chimwaga />
+        {SeatingPlan}
       </>
     )
   }

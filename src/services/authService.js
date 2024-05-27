@@ -14,6 +14,12 @@ const login = (username, password) => {
                 access: response.data.access,
                 refresh: response.data.refresh,
                 groups: decodedToken.groups,
+                username: decodedToken.username || null,
+                first_name: decodedToken.first_name || null,
+                last_name: decodedToken.last_name || null,
+                degree_level: decodedToken.degree_level || null,
+                degree_program: decodedToken.degree_program || null,
+                college: decodedToken.college || null,
             };
             localStorage.setItem('user', JSON.stringify(user));
         }
