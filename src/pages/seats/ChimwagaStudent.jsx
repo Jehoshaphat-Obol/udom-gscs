@@ -3,6 +3,7 @@ import './Chimwaga.css';
 const apiUrl = import.meta.env.VITE_API_URL;
 import axios from '../../axiosInstance'
 import { DataTable } from 'simple-datatables';
+import authService from '../../services/authService';
 
 
 function generateSeats(row, id = "") {
@@ -37,13 +38,16 @@ export default class ChimwagaStudent extends Component {
                 to: "",
             },
             seating_plan: [],
-            new_guest:{
-                "name": "",
-                "status": "EX"
+            new_guest: {
+                student: authService.getCurrentUser().username,
+                name: "",
+                type: "PRT",
+                status: "EX",
             },
         }
 
-        this.handleGuestRegistration = this.handleGuestRegistration.bind(this)
+        this.handleGuestChange = this.handleGuestChange.bind(this);
+        this.addParent = this.addParent.bind(this)
     }
 
     handleWheel = (e) => {
@@ -60,7 +64,7 @@ export default class ChimwagaStudent extends Component {
 
     handleMouseDown = (e) => {
         e.preventDefault();
-        this.setState((prevState)=>({
+        this.setState((prevState) => ({
             ...prevState,
             isDragging: true,
             lastX: e.clientX,
@@ -84,7 +88,7 @@ export default class ChimwagaStudent extends Component {
 
 
     handleMouseUp = () => {
-        this.setState((prevState)=>({ ...prevState, isDragging: false }));
+        this.setState((prevState) => ({ ...prevState, isDragging: false }));
     };
 
     handlePinch = (e) => {
@@ -108,46 +112,12 @@ export default class ChimwagaStudent extends Component {
             new_guest: {
                 ...prevState.new_guest,
                 [name]: value,
-                ['user']: {
-                    'username' : (name === 'name')? value: prevState.new_guest.name,
-                    'password' : (name === 'password')? value: prevState.new_guest.password
-                }
-
             }
-        }), ()=>{
+        }), () => {
         });
     };
 
-
-    handleGuestRegistration(e){
-        e.preventDefault();
-        axios.post(apiUrl + 'guests/', this.state.new_guest)
-        .then(response => {
-            //clear the form
-            this.setState((prevState)=>({
-                new_guest: {
-                    ...prevState.new_guest,
-                    student: "",
-                    name: "",
-                    password: "", 
-                    type: "PRT",
-                    status: "EX",
-                },
-            }
-            ))
-            this.reloadGuestsTable();
-        })
-        .catch(error=>{
-            console.log(error)
-        })
-
-    }
-
-    componentDidMount() {
-        // Add event listeners with passive: false option
-        this.container.addEventListener('wheel', this.handleWheel, { passive: false });
-        this.container.addEventListener('touchmove', this.handlePinch, { passive: false });
-
+    reload() {
         axios.get(apiUrl + 'rows/')
             .then((response) => {
                 this.setState(prevState => ({
@@ -192,7 +162,25 @@ export default class ChimwagaStudent extends Component {
             .catch((error) => {
                 console.log(error)
             })
+    }
 
+    addParent() {
+        const guest = this.state.new_guest;
+        axios.post(apiUrl + 'parents/', guest)
+            .then(response => {
+                console.log(response)
+            })
+            .catch(error => {
+                console.log(error)
+            })
+    }
+
+    componentDidMount() {
+        // Add event listeners with passive: false option
+        this.container.addEventListener('wheel', this.handleWheel, { passive: false });
+        this.container.addEventListener('touchmove', this.handlePinch, { passive: false });
+
+        this.reload();
     }
     render() {
         const { scale, translateX, translateY, lastX, lastY } = this.state;
@@ -437,7 +425,7 @@ export default class ChimwagaStudent extends Component {
                                             <option value="PP">Postponed</option>
                                         </select>
                                     </div>
-                                    <button type="submit" className="btn btn-primary">
+                                    <button type="button" className="btn btn-primary" onClick={this.addParent}>
                                         Register
                                     </button>
                                 </form>
