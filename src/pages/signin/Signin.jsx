@@ -57,10 +57,7 @@ export default class Signin extends Component {
     })
   }
 
-  componentDidMount(){
-  }
   render() {
-    localStorage.removeItem('user');
     const { username, password, loading, message, mainMessage } = this.state;
     return (
       <main>

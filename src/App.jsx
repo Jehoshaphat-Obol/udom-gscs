@@ -8,6 +8,7 @@ import Timetable from './pages/timetable/Timetable'
 import Report from './pages/report/Report'
 import Signin from './pages/signin/Signin'
 import withAuth from './HOC/withAuth'
+import authService from './services/authService'
 
 const SystemLayout = () => {
   return (
@@ -27,13 +28,21 @@ const SystemLayout = () => {
 }
 
 const ProtectedSystemLayout = withAuth(SystemLayout)
+const ClearSignin = (Component)=>{
+  // authService.logout()
+  return (props)=>{
+    return <Component {...props} />
+  }
+}
+
+const ReSignin = ClearSignin(Signin)
 
 function App() {
   return (
     <>
       <BrowserRouter>
         <Routes>
-          <Route path="/auth/" element={<Signin />} />
+          <Route path="/auth/" element={<ReSignin />} />
           <Route path="/" element={<ProtectedSystemLayout />}>
             <Route index element={<Home />} />
             <Route path='/seats' element={<Seats />} />
