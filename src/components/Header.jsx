@@ -27,22 +27,22 @@ export default class Header extends Component {
             </span>
             <i className="bi bi-list toggle-sidebar-btn" onClick={this.toggleSidebar}></i>
         </div>
-
+{/* 
         <div className="search-bar">
             <form className="search-form d-flex align-items-center" method="POST" action="#">
                 <input type="text" name="query" placeholder="Search" title="Enter search keyword" />
                 <button type="submit" title="Search"><i className="bi bi-search"></i></button>
             </form>
-        </div>
+        </div> */}
 
         <nav className="header-nav ms-auto">
             <ul className="d-flex align-items-center">
-                <li className="nav-item d-block d-lg-none">
+                {/* <li className="nav-item d-block d-lg-none">
                     <a className="nav-link nav-icon search-bar-toggle " onClick={this.toggleSearchBar} href="#">
                         <i className="bi bi-search"></i>
                     </a>
-                </li>
-                <li className="nav-item dropdown">
+                </li> */}
+                {/* <li className="nav-item dropdown">
 
                         <a className="nav-link nav-icon" href="#" data-bs-toggle="dropdown">
                             <i className="bi bi-bell"></i>
@@ -115,9 +115,9 @@ export default class Header extends Component {
 
                         </ul>
 
-                </li>
+                </li> */}
 
-                <li className="nav-item dropdown">
+                {/* <li className="nav-item dropdown">
 
                         <a className="nav-link nav-icon" href="#" data-bs-toggle="dropdown">
                             <i className="bi bi-chat-left-text"></i>
@@ -181,7 +181,7 @@ export default class Header extends Component {
 
                         </ul>
 
-                </li>
+                </li> */}
 
                 <li className="nav-item dropdown pe-3">
 
