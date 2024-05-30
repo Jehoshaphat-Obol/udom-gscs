@@ -44,6 +44,7 @@ export default class ChimwagaStudent extends Component {
                 type: "PRT",
                 status: "EX",
             },
+            parents: null,
         }
 
         this.handleGuestChange = this.handleGuestChange.bind(this);
@@ -140,8 +141,6 @@ export default class ChimwagaStudent extends Component {
                                 return seat.user_details != null;
                             }),
                         }), () => {
-                            const seating_plan_datatable = new DataTable('.seatingplan-datatable');
-
                             this.state.seating_plan.forEach((seat, index) => {
                                 const chair = document.querySelector(`.seat.${seat.user_details.ticket}#${seat.user_details.ticket}`);
                                 chair.classList.add('taken');
@@ -162,13 +161,25 @@ export default class ChimwagaStudent extends Component {
             .catch((error) => {
                 console.log(error)
             })
+        axios.get(apiUrl + 'parents/')
+        .then(response=>{
+            this.setState(prevState=>({
+                ...prevState,
+                parents: response.data,
+            }),()=>{
+                console.log(this.state.parents)
+            })
+        })
+        .catch(error=>{
+            console.log(error);
+        })
     }
 
     addParent() {
         const guest = this.state.new_guest;
         axios.post(apiUrl + 'parents/', guest)
             .then(response => {
-                console.log(response)
+                this.reload();
             })
             .catch(error => {
                 console.log(error)
@@ -196,6 +207,9 @@ export default class ChimwagaStudent extends Component {
                                 </li>
                                 <li className="nav-item" role="presentation">
                                     <button className="nav-link" id="contact-tab" data-bs-toggle="tab" data-bs-target="#bordered-contact" type="button" role="tab" aria-controls="contact" aria-selected="false" tabIndex="-1">Seating Plan</button>
+                                </li>
+                                <li className="nav-item" role="presentation">
+                                    <button className="nav-link" id="parent-tab" data-bs-toggle="tab" data-bs-target="#bordered-parent" type="button" role="tab" aria-controls="parent" aria-selected="false" tabIndex="-1">Parents</button>
                                 </li>
                             </ul>
                             <div className="tab-content pt-2" id="borderedTabContent">
@@ -362,7 +376,6 @@ export default class ChimwagaStudent extends Component {
                                                         <th scope="col">Type</th>
                                                         <th scope="col">Status</th>
                                                         <th scope="col">Ticket</th>
-                                                        <th scope="col">Student Id</th>
                                                     </tr>
                                                 </thead>
                                                 <tbody>
@@ -378,8 +391,44 @@ export default class ChimwagaStudent extends Component {
                                                                         <td><span className="badge bg-danger">Postponed</span></td>
                                                                     )
                                                                 }
-                                                                <td>{seat.user_details.ticket}</td>
-                                                                <td>{seat.user_details.student}</td>
+                                                                <td>{(seat.user_details.link)?(<a href={`/map/${seat.user_details.link}`}>{seat.user_details.ticket}</a>):(seat.user_details.ticket)}</td>
+                                                                <td>{}</td>
+                                                            </tr>
+                                                        ))
+                                                    }
+                                                </tbody>
+                                            </table>
+                                            <span className='text-success'>Copy the links to the parents seats and share</span>
+                                        </>
+                                    )}
+                                </div>
+                                <div className="tab-pane fade" id="bordered-parent" role="tabpanel" aria-labelledby="parent-tab">
+
+                                    {(this.state.parents == null) ? (
+                                        <div className="spinner-border text-primary d-flex justify-content-center" role="status">
+                                            <span className="visually-hidden">Loading...</span>
+                                        </div>
+                                    ) : (
+                                        <>
+                                            <table className="table table-borderless seatingplan-datatable">
+                                                <thead>
+                                                    <tr>
+                                                        <th scope="col">Name</th>
+                                                        <th scope="col">Status</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    {
+                                                        this.state.parents.map((parent, index) => (
+                                                            <tr key={index}>
+                                                                <td>{parent.name}</td>
+                                                                {
+                                                                    (parent.status === "EX") ? (
+                                                                        <td><span className="badge bg-success">Expected</span></td>
+                                                                    ) : (
+                                                                        <td><span className="badge bg-danger">Postponed</span></td>
+                                                                    )
+                                                                }
                                                             </tr>
                                                         ))
                                                     }
@@ -394,7 +443,6 @@ export default class ChimwagaStudent extends Component {
                     </div>
                 </div>
                 <div className="col-lg-4">
-
                     {/* Guest Registration form */}
                     <div className="card">
                         <div className="card-body">

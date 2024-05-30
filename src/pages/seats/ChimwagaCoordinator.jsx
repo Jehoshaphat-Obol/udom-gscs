@@ -237,7 +237,7 @@ export default class ChimwagaCoordinator extends Component {
             axios.post(apiUrl + 'batch_student_plan/', seating_plan)
                 .then(response => {
                     console.log(response)
-                    window.location.href = '/seats/'
+                    this.reload();
                 })
                 .catch(error => {
                     console.log(error)
@@ -252,7 +252,7 @@ export default class ChimwagaCoordinator extends Component {
         this.state.tickets.forEach((ticket, index) => {
             if (index <= total_selection - 1) {
                 seating_plan.push({
-                    username: this.state.selectedGuests[index].user.username,
+                    username: (this.state.selectedGuests[index].user)?(this.state.selectedGuests[index].user.username):(null),
                     ticket,
                 })
             }
@@ -262,7 +262,7 @@ export default class ChimwagaCoordinator extends Component {
             axios.post(apiUrl + 'batch_student_plan/', seating_plan)
                 .then(response => {
                     console.log(response)
-                    window.location.href = '/seats/'
+                    this.reload()
                 })
                 .catch(error => {
                     console.log(error)
@@ -271,10 +271,7 @@ export default class ChimwagaCoordinator extends Component {
         }
     }
 
-    componentDidMount() {
-        // Add event listeners with passive: false option
-        this.container.addEventListener('wheel', this.handleWheel, { passive: false });
-        this.container.addEventListener('touchmove', this.handlePinch, { passive: false });
+    reload(){
 
         axios.get(apiUrl + 'unassigned_students/')
             .then(response => {
@@ -385,6 +382,13 @@ export default class ChimwagaCoordinator extends Component {
             .catch((error) => {
                 console.log(error)
             })
+    }
+    componentDidMount() {
+        // Add event listeners with passive: false option
+        this.container.addEventListener('wheel', this.handleWheel, { passive: false });
+        this.container.addEventListener('touchmove', this.handlePinch, { passive: false });
+
+        this.reload();
 
     }
     render() {
@@ -621,8 +625,8 @@ export default class ChimwagaCoordinator extends Component {
                                                             <tr key={guest.id}>
                                                                 <td scope="row"><a href="#">{guest.name}</a></td>
                                                                 <td scope="row">{guest.student}</td>
-                                                                <td scope="row">{guest.type}</td>
-                                                                <td scope="row">{guest.status}</td>
+                                                                <td scope="row">{(guest.type=='PRT')?('Parent'):('VIP')}</td>
+                                                                <td scope="row">{(guest.status=='EX')?('Expected'):('Postponed')}</td>
                                                             </tr>
                                                         ))
                                                     }
