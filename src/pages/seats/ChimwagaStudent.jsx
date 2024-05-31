@@ -391,7 +391,7 @@ export default class ChimwagaStudent extends Component {
                                                                         <td><span className="badge bg-danger">Postponed</span></td>
                                                                     )
                                                                 }
-                                                                <td>{(seat.user_details.link)?(<a href={`/map/${seat.user_details.link}`} target="_blank">{seat.user_details.ticket}</a>):(seat.user_details.ticket)}</td>
+                                                                <td>{(seat.user_details.link)?(<a href={`/map/?q=${seat.user_details.link}`} target="_blank">{seat.user_details.ticket}</a>):(seat.user_details.ticket)}</td>
                                                                 <td>{}</td>
                                                             </tr>
                                                         ))

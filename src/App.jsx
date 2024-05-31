@@ -9,6 +9,7 @@ import Report from './pages/report/Report'
 import Signin from './pages/signin/Signin'
 import withAuth from './HOC/withAuth'
 import authService from './services/authService'
+import Map from './pages/map/Map'
 
 const SystemLayout = () => {
   return (
@@ -49,6 +50,7 @@ function App() {
             <Route path='/timetable' element={<Timetable />} />
             <Route path='/report' element={<Report />} />
           </Route>
+          <Route path="/map" element={<Map />} />
           <Route path="/error" element={<Error404 />} />
           <Route path="*" element={<Error404 />} />
         </Routes>
