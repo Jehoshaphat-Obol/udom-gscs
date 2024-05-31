@@ -37,12 +37,6 @@ export default class ChimwagaGuest extends Component {
                 to: "",
             },
             seating_plan: [],
-            new_guest: {
-                student: authService.getCurrentUser().username,
-                name: "",
-                type: "PRT",
-                status: "EX",
-            },
             parents: null,
         }
 
