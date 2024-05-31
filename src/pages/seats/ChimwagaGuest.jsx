@@ -3,7 +3,7 @@ import './Chimwaga.css';
 const apiUrl = import.meta.env.VITE_API_URL;
 import axios from '../../axiosInstance'
 import { DataTable } from 'simple-datatables';
-
+import authService from '../../services/authService';
 
 function generateSeats(row, id = "") {
     const seats = [];
@@ -37,10 +37,14 @@ export default class ChimwagaGuest extends Component {
                 to: "",
             },
             seating_plan: [],
+            new_guest: {
+                student: authService.getCurrentUser().username,
+                name: "",
+                type: "PRT",
+                status: "EX",
+            },
+            parents: null,
         }
-
-        this.handleStudentArrangement = this.handleStudentArrangement.bind(this);
-        this.handleGuestArrangement = this.handleGuestArrangement.bind(this)
 
     }
 
@@ -58,11 +62,12 @@ export default class ChimwagaGuest extends Component {
 
     handleMouseDown = (e) => {
         e.preventDefault();
-        this.setState({
+        this.setState((prevState) => ({
+            ...prevState,
             isDragging: true,
             lastX: e.clientX,
             lastY: e.clientY
-        });
+        }));
     };
 
     handleMouseMove = (e) => {
@@ -70,6 +75,7 @@ export default class ChimwagaGuest extends Component {
         const deltaX = e.clientX - this.state.lastX;
         const deltaY = e.clientY - this.state.lastY;
         this.setState((prevState) => ({
+            ...prevState,
             lastX: e.clientX,
             lastY: e.clientY,
             // Update position based on drag delta
@@ -80,7 +86,7 @@ export default class ChimwagaGuest extends Component {
 
 
     handleMouseUp = () => {
-        this.setState({ isDragging: false });
+        this.setState((prevState) => ({ ...prevState, isDragging: false }));
     };
 
     handlePinch = (e) => {
@@ -95,252 +101,7 @@ export default class ChimwagaGuest extends Component {
         ))
     }
 
-    handleFromChange = (e) => {
-        const from = e.target.value.toUpperCase();
-        this.setState(prevState => (
-            {
-                ...prevState,
-                form: {
-                    ...prevState.form,
-                    from
-                }
-            }
-        ), () => {
-            const seats = document.querySelectorAll('.seat')
-
-            seats.forEach(seat => {
-                if (!seat.classList.contains('taken')) {
-                    seat.style = "background: transparent";
-                }
-            })
-
-            if (from) {
-                const tickets = [];
-                const seat = document.querySelector(`#${from}`);
-                if (seat) {
-                    seat.style = "background: blue;"
-                }
-
-                if (this.state.form.to && this.state.form.from) {
-
-                    seats.forEach(seat => {
-                        seat.style = "background: transparent";
-                    })
-                    let fromIndex, toIndex;
-                    seats.forEach((seat, index) => {
-                        if (seat.id == `${this.state.form.from}`) {
-                            fromIndex = index;
-                        }
-                        if (seat.id == `${this.state.form.to}`) {
-                            toIndex = index;
-                        }
-                    })
-
-                    if (fromIndex <= toIndex) {
-                        for (let i = fromIndex; i <= toIndex; i++) {
-                            if (!seats[i].classList.contains('taken')) {
-                                seats[i].style = "background: blue;"
-                                tickets.push(seats[i].id);
-                            }
-                        }
-                        this.setState((prevState) => {
-                            return {
-                                ...prevState,
-                                tickets
-                            }
-                        })
-                    } else {
-                        document.querySelectorAll('.taken.seat').forEach((chair) => {
-                            chair.style = 'background: orange;'
-                        })
-                    }
-                } else {
-                    document.querySelectorAll('.taken.seat').forEach((chair) => {
-                        chair.style = 'background: orange;'
-                    })
-                }
-            }
-        })
-    }
-
-    handleToChange = (e) => {
-        const to = e.target.value.toUpperCase();
-        this.setState(prevState => (
-            {
-                ...prevState,
-                form: {
-                    ...prevState.form,
-                    to
-                }
-            }
-        ), () => {
-            const seats = document.querySelectorAll('.seat')
-
-
-            seats.forEach(seat => {
-                if (!seat.classList.contains('taken')) {
-                    seat.style = "background: transparent";
-                }
-            })
-
-            if (to && this.state.form.from) {
-                const tickets = [];
-                let fromIndex, toIndex;
-                seats.forEach((seat, index) => {
-                    if (seat.id == `${this.state.form.from}`) {
-                        fromIndex = index;
-                    }
-                    if (seat.id == `${to}`) {
-                        toIndex = index;
-                    }
-                })
-
-                if (fromIndex <= toIndex) {
-                    for (let i = fromIndex; i <= toIndex; i++) {
-                        if (!seats[i].classList.contains('taken')) {
-                            seats[i].style = "background: blue;"
-                            tickets.push(seats[i].id);
-                        }
-                    }
-                    this.setState((prevState) => {
-                        return {
-                            ...prevState,
-                            tickets
-                        }
-                    })
-                } else {
-                    document.querySelectorAll('.taken.seat').forEach((chair) => {
-                        chair.style = 'background: orange;'
-                    })
-                }
-            } else {
-                document.querySelectorAll('.taken.seat').forEach((chair) => {
-                    chair.style = 'background: orange;'
-                })
-            }
-        })
-    }
-
-    handleStudentArrangement() {
-        const seating_plan = [];
-        const total_selection = this.state.selected.length;
-        this.state.tickets.forEach((ticket, index) => {
-            if (index <= total_selection - 1) {
-                seating_plan.push({
-                    username: this.state.selected[index].user.username,
-                    ticket,
-                })
-            }
-        });
-
-        if (total_selection > 0 && this.state.tickets.length > 0) {
-            axios.post(apiUrl + 'batch_student_plan/', seating_plan)
-                .then(response => {
-                    console.log(response)
-                    window.location.href = '/seats/'
-                })
-                .catch(error => {
-                    console.log(error)
-                })
-            console.log(seating_plan);
-        }
-    }
-
-    handleGuestArrangement() {
-        const seating_plan = [];
-        const total_selection = this.state.selectedGuests.length;
-        this.state.tickets.forEach((ticket, index) => {
-            if (index <= total_selection - 1) {
-                seating_plan.push({
-                    username: this.state.selectedGuests[index].user.username,
-                    ticket,
-                })
-            }
-        });
-
-        if (total_selection > 0 && this.state.tickets.length > 0) {
-            axios.post(apiUrl + 'batch_student_plan/', seating_plan)
-                .then(response => {
-                    console.log(response)
-                    window.location.href = '/seats/'
-                })
-                .catch(error => {
-                    console.log(error)
-                })
-            console.log(seating_plan);
-        }
-    }
-
-    componentDidMount() {
-        // Add event listeners with passive: false option
-        this.container.addEventListener('wheel', this.handleWheel, { passive: false });
-        this.container.addEventListener('touchmove', this.handlePinch, { passive: false });
-
-        axios.get(apiUrl + 'unassigned_students/')
-            .then(response => {
-                this.setState(prevState => ({
-                    ...prevState,
-                    unassignedStudents: response.data.filter(student => {
-                        return student.graduation_status == "EX"
-                    }),
-                    selected: response.data.filter(student => {
-                        return student.graduation_status == "EX"
-                    })
-                    ,
-                }), () => {
-                    console.log(this.state.selected)
-                    const students_datatable = new DataTable('.students-datatable');
-                    students_datatable.on('datatable.search', (query, matched) => {
-                        const selection = []
-                        matched.forEach(item => {
-                            selection.push(this.state.unassignedStudents[item])
-                        })
-                        this.setState(prevState => ({
-                            ...prevState,
-                            selected: selection,
-                        }), () => {
-                            console.log(this.state.selected)
-                        })
-                    })
-                })
-            })
-            .catch(error => {
-                console.log(error)
-            })
-
-        
-            axios.get(apiUrl + 'unassigned_guests/')
-            .then(response => {
-                this.setState(prevState => ({
-                    ...prevState,
-                    unassignedGuests: response.data.filter(guest => {
-                        return guest.status == "EX"
-                    }),
-                    selectedGuests: response.data.filter(guest => {
-                        return guest.status == "EX"
-                    })
-                    ,
-                }), () => {
-                    console.log(this.state.selectedGuests)
-                    const guests_datatable = new DataTable('.guests-datatable');
-                    guests_datatable.on('datatable.search', (query, matched) => {
-                        const selection = []
-                        matched.forEach(item => {
-                            selection.push(this.state.unassignedGuests[item])
-                        })
-                        this.setState(prevState => ({
-                            ...prevState,
-                            selectedGuests: selection,
-                        }), () => {
-                            console.log(this.state.selectedGuests)
-                        })
-                    })
-                })
-            })
-            .catch(error => {
-                console.log(error)
-            })
-
+    reload() {
         axios.get(apiUrl + 'rows/')
             .then((response) => {
                 this.setState(prevState => ({
@@ -363,8 +124,6 @@ export default class ChimwagaGuest extends Component {
                                 return seat.user_details != null;
                             }),
                         }), () => {
-                            const seating_plan_datatable = new DataTable('.seatingplan-datatable');
-
                             this.state.seating_plan.forEach((seat, index) => {
                                 const chair = document.querySelector(`.seat.${seat.user_details.ticket}#${seat.user_details.ticket}`);
                                 chair.classList.add('taken');
@@ -386,6 +145,18 @@ export default class ChimwagaGuest extends Component {
                 console.log(error)
             })
 
+        .catch(error=>{
+            console.log(error);
+        })
+    }
+
+
+    componentDidMount() {
+        // Add event listeners with passive: false option
+        this.container.addEventListener('wheel', this.handleWheel, { passive: false });
+        this.container.addEventListener('touchmove', this.handlePinch, { passive: false });
+
+        this.reload();
     }
     render() {
         const { scale, translateX, translateY, lastX, lastY } = this.state;
@@ -398,15 +169,6 @@ export default class ChimwagaGuest extends Component {
                             <ul className="nav nav-tabs nav-tabs-bordered" id="borderedTab" role="tablist">
                                 <li className="nav-item" role="presentation">
                                     <button className="nav-link active" id="home-tab" data-bs-toggle="tab" data-bs-target="#bordered-home" type="button" role="tab" aria-controls="home" aria-selected="true" tabIndex="-1">Map</button>
-                                </li>
-                                <li className="nav-item" role="presentation">
-                                    <button className="nav-link" id="profile-tab" data-bs-toggle="tab" data-bs-target="#bordered-profile" type="button" role="tab" aria-controls="profile" aria-selected="false">Unassigned Students</button>
-                                </li>
-                                <li className="nav-item" role="presentation">
-                                    <button className="nav-link" id="profile-tab" data-bs-toggle="tab" data-bs-target="#bordered-guests" type="button" role="tab" aria-controls="guests" aria-selected="false">Unassigned Guests</button>
-                                </li>
-                                <li className="nav-item" role="presentation">
-                                    <button className="nav-link" id="contact-tab" data-bs-toggle="tab" data-bs-target="#bordered-contact" type="button" role="tab" aria-controls="contact" aria-selected="false" tabIndex="-1">Seating Plan</button>
                                 </li>
                             </ul>
                             <div className="tab-content pt-2" id="borderedTabContent">
@@ -558,143 +320,18 @@ export default class ChimwagaGuest extends Component {
                                         </div>
                                     </div>
                                 </div>
-                                <div className="tab-pane fade" id="bordered-profile" role="tabpanel" aria-labelledby="profile-tab">
-
-                                    {(this.state.unassignedStudents == null) ? (
-                                        <div className="spinner-border text-primary d-flex justify-content-center" role="status">
-                                            <span className="visually-hidden">Loading...</span>
-                                        </div>
-                                    ) : (
-                                        <>
-                                            <table className="table table-borderless students-datatable">
-                                                <thead>
-                                                    <tr>
-                                                        <th scope="col">Reg. No</th>
-                                                        <th scope="col">Name</th>
-                                                        <th scope="col">Collage</th>
-                                                        <th scope="col">Degree Level</th>
-                                                        <th scope="col">Program</th>
-                                                    </tr>
-                                                </thead>
-                                                <tbody>
-                                                    {
-                                                        this.state.unassignedStudents.map((student) => (
-                                                            <tr key={student.id}>
-                                                                <td scope="row"><a href="#">{student.user.username}</a></td>
-                                                                <td>{student.user.first_name + " " + student.user.last_name}</td>
-                                                                <td><a href="#" className="text-primary">{student.college.toUpperCase()}</a></td>
-                                                                <td>{student.degree_level}</td>
-                                                                <td>{student.degree_program}</td>
-                                                            </tr>
-                                                        ))
-                                                    }
-                                                </tbody>
-                                            </table>
-                                            <div className='d-flex flex-row-reverse'>
-                                                <button type="button" className="btn btn-primary" onClick={this.handleStudentArrangement}>
-                                                    Arrange Students
-                                                </button>
-                                            </div>
-                                        </>
-                                    )}
-                                </div>
-                                <div className="tab-pane fade" id="bordered-guests" role="tabpanel" aria-labelledby="profile-tab">
-
-                                    {(this.state.unassignedGuests == null) ? (
-                                        <div className="spinner-border text-primary d-flex justify-content-center" role="status">
-                                            <span className="visually-hidden">Loading...</span>
-                                        </div>
-                                    ) : (
-                                        <>
-                                            <table className="table table-borderless guests-datatable">
-                                                <thead>
-                                                    <tr>
-                                                        <th scope="col">Name</th>
-                                                        <th scope="col">Student</th>
-                                                        <th scope="col">Type</th>
-                                                        <th scope="col">Status</th>
-                                                    </tr>
-                                                </thead>
-                                                <tbody>
-                                                    {
-                                                        this.state.unassignedGuests.map((guest) => (
-                                                            <tr key={guest.id}>
-                                                                <td scope="row"><a href="#">{guest.name}</a></td>
-                                                                <td scope="row">{guest.student}</td>
-                                                                <td scope="row">{guest.type}</td>
-                                                                <td scope="row">{guest.status}</td>
-                                                            </tr>
-                                                        ))
-                                                    }
-                                                </tbody>
-                                            </table>
-                                            <div className='d-flex flex-row-reverse'>
-                                                <button type="button" className="btn btn-primary" onClick={this.handleGuestArrangement}>
-                                                    Arrange Guests
-                                                </button>
-                                            </div>
-                                        </>
-                                    )}
-                                </div>
-                                <div className="tab-pane fade" id="bordered-contact" role="tabpanel" aria-labelledby="contact-tab">
-
-                                    {(this.state.seating_plan == null) ? (
-                                        <div className="spinner-border text-primary d-flex justify-content-center" role="status">
-                                            <span className="visually-hidden">Loading...</span>
-                                        </div>
-                                    ) : (
-                                        <>
-                                            <table className="table table-borderless seatingplan-datatable">
-                                                <thead>
-                                                    <tr>
-                                                        <th scope="col">Name</th>
-                                                        <th scope="col">Type</th>
-                                                        <th scope="col">Status</th>
-                                                        <th scope="col">Ticket</th>
-                                                        <th scope="col">Student Id</th>
-                                                    </tr>
-                                                </thead>
-                                                <tbody>
-                                                    {
-                                                        this.state.seating_plan.map((seat, index) => (
-                                                            <tr key={index}>
-                                                                <td>{seat.user_details.name}</td>
-                                                                <td>{seat.user_details.type}</td>
-                                                                {
-                                                                    (seat.user_details.status === "EX") ? (
-                                                                        <td><span className="badge bg-success">Expected</span></td>
-                                                                    ) : (
-                                                                        <td><span className="badge bg-danger">Postponed</span></td>
-                                                                    )
-                                                                }
-                                                                <td>{seat.user_details.ticket}</td>
-                                                                <td>{seat.user_details.student}</td>
-                                                            </tr>
-                                                        ))
-                                                    }
-                                                </tbody>
-                                            </table>
-                                        </>
-                                    )}
-                                </div>
                             </div>
 
                         </div>
                     </div>
                 </div>
                 <div className="col-lg-4">
+                    {/* Guest Registration form */}
                     <div className="card">
                         <div className="card-body">
-                            <h5 className="card-title">Assign Seats - {this.state.tickets.length} Seats Selected</h5>
+                            <h5 className="card-title">Ticket Number</h5>
                             <div>
-                                <form onSubmit={() => (false)}>
-                                    <div className="mb-3">
-                                        <input type="text" placeholder="From" className="form-control" onChange={this.handleFromChange} value={this.state.form.from} />
-                                    </div>
-                                    <div className="mb-3">
-                                        <input type="text" placeholder="To" className="form-control" onChange={this.handleToChange} value={this.state.form.to} />
-                                    </div>
-                                </form>
+                                {(this.state.seating_plan.length == 1)?(this.state.seating_plan[0].user_details.ticket):("-")}
                             </div>
                         </div>
                     </div>

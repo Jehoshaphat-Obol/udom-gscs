@@ -103,7 +103,7 @@ export default class StudentDashboard extends Component {
                                 <div className="card-body">
                                     <h5 className="card-title"><i className='bi bi-map'></i> Graduation Venue</h5>
 
-                                    {/* <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3966.435068146697!2d35.792521274998194!3d-6.206201360793992!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x184dfb19d5bc11d9%3A0xf118dd4224e1e44!2sChimwaga%20Complex%2C%20University%20of!5e0!3m2!1sen!2stz!4v1713362895707!5m2!1sen!2stz" allowFullScreen="" loading="lazy" referrerPolicy="no-referrer-when-downgrade" width="100%" height="100%" style={{ aspectRatio: 1 / 1 }}></iframe> */}
+                                    <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3966.435068146697!2d35.792521274998194!3d-6.206201360793992!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x184dfb19d5bc11d9%3A0xf118dd4224e1e44!2sChimwaga%20Complex%2C%20University%20of!5e0!3m2!1sen!2stz!4v1713362895707!5m2!1sen!2stz" allowFullScreen="" loading="lazy" referrerPolicy="no-referrer-when-downgrade" width="100%" height="100%" style={{ aspectRatio: 1 / 1 }}></iframe>
                                 </div>
                             </div>
                         </div>

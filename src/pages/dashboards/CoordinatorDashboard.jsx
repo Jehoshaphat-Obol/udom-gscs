@@ -240,7 +240,9 @@ export default class CoordinatorDashboard extends Component {
 
     handleGuestRegistration(e){
         e.preventDefault();
-        axios.post(apiUrl + 'guests/', this.state.new_guest)
+        const new_guest = this.state.new_guest;
+        (new_guest.student == "")?(delete new_guest.student) : new_guest.student
+        axios.post(apiUrl + 'guests/', new_guest)
         .then(response => {
             //clear the form
             this.setState((prevState)=>({

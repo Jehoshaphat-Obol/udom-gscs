@@ -20,6 +20,7 @@ const login = (username, password) => {
                 degree_level: decodedToken.degree_level || null,
                 degree_program: decodedToken.degree_program || null,
                 college: decodedToken.college || null,
+                type: decodedToken.type || null,
             };
             localStorage.setItem('user', JSON.stringify(user));
         }
