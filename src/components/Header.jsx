@@ -42,7 +42,7 @@ export default class Header extends Component {
                         <i className="bi bi-search"></i>
                     </a>
                 </li> */}
-                {/* <li className="nav-item dropdown">
+                <li className="nav-item dropdown">
 
                         <a className="nav-link nav-icon" href="#" data-bs-toggle="dropdown">
                             <i className="bi bi-bell"></i>
@@ -115,9 +115,9 @@ export default class Header extends Component {
 
                         </ul>
 
-                </li> */}
+                </li>
 
-                {/* <li className="nav-item dropdown">
+                <li className="nav-item dropdown">
 
                         <a className="nav-link nav-icon" href="#" data-bs-toggle="dropdown">
                             <i className="bi bi-chat-left-text"></i>
@@ -181,7 +181,7 @@ export default class Header extends Component {
 
                         </ul>
 
-                </li> */}
+                </li>
 
                 <li className="nav-item dropdown pe-3">
 
