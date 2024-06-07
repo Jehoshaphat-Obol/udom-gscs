@@ -3,6 +3,7 @@ import StudentDashboard from '../dashboards/StudentDashboard';
 import CoordinatorDashboard from '../dashboards/CoordinatorDashboard';
 import GuestDashboard from '../dashboards/GuestDashboard';
 import authService from '../../services/authService';
+import './Home.css';
 
 export default class Home extends Component {
   getDashboard() {
