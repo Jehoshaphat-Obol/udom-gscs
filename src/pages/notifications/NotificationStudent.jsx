@@ -63,7 +63,7 @@ export default class NotificationStudent extends Component {
                 <div className='card'>
                     <div className="card-body">
                         <h5 className="card-title">
-                            Broadcast Notifications
+                            Notifications
                         </h5>
                         {loading && <p>Loading...</p>}
                         {error && <p>{error}</p>}

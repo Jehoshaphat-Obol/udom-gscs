@@ -43,6 +43,13 @@ export default class SideBar extends Component {
                             <span>Notifications</span>
                         </NavLink>
                     </li>
+
+                    <li className="nav-item">
+                        <NavLink className={(navData) => (navData.isActive ? "nav-link" : "nav-link collapsed")} to="/message">
+                            <i className="bi bi-chat-left-text"></i>
+                            <span>Messages</span>
+                        </NavLink>
+                    </li>
                 </ul>
             </>
         )

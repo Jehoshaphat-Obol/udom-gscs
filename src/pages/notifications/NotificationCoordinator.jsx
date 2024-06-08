@@ -77,7 +77,7 @@ export default class NotificationCoordinator extends Component {
         const { notifications, loading, error } = this.state;
 
         const columns = [
-            { name: 'ID', selector: row => row.id, sortable: true },
+            { name: 'ID', selector: (row, index) => index + 1, sortable: true },
             { name: 'Coordinator', selector: row => row.coordinator.username, sortable: true },
             { name: 'Content', selector: row => row.content, sortable: true },
             { name: 'Created At', selector: row => new Date(row.created_at).toLocaleString(), sortable: true },
@@ -89,7 +89,7 @@ export default class NotificationCoordinator extends Component {
                     <nav>
                         <ol className="breadcrumb">
                             <li className="breadcrumb-item"><Link to="/">Home</Link></li>
-                            <li className="breadcrumb-item active">Broadcast</li>
+                            <li className="breadcrumb-item active">Notification</li>
                         </ol>
                     </nav>
                 </div>
@@ -98,7 +98,7 @@ export default class NotificationCoordinator extends Component {
                         <div className='card'>
                             <div className="card-body">
                                 <h5 className="card-title">
-                                    Broadcast Notifications
+                                    Notifications
                                 </h5>
                                 {loading && <p>Loading...</p>}
                                 {error && <p>{error}</p>}

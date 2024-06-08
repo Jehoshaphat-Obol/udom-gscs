@@ -11,6 +11,7 @@ import withAuth from './HOC/withAuth'
 import authService from './services/authService'
 import Map from './pages/map/Map'
 import Notification from './pages/notifications/Notification'
+import Messages from './pages/messages/Messages'
 
 const SystemLayout = () => {
   return (
@@ -51,6 +52,7 @@ function App() {
             <Route path='/timetable' element={<Timetable />} />
             <Route path='/report' element={<Report />} />
             <Route path='/notification' element={<Notification />} />
+            <Route path='/message' element={<Messages />} />
           </Route>
           <Route path="/map" element={<Map />} />
           <Route path="/error" element={<Error404 />} />

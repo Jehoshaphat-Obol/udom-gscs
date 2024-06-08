@@ -51,7 +51,7 @@ export default class NotificationGuest extends Component {
         return (
             <>
                 <div className="pagetitle">
-                    <h1>Broadcast Notification</h1>
+                    <h1>Notification</h1>
                     <nav>
                         <ol className="breadcrumb">
                             <li className="breadcrumb-item"><Link to="/">Home</Link></li>
@@ -63,7 +63,7 @@ export default class NotificationGuest extends Component {
                 <div className='card'>
                     <div className="card-body">
                         <h5 className="card-title">
-                            Broadcast Notifications
+                            Notifications
                         </h5>
                         {loading && <p>Loading...</p>}
                         {error && <p>{error}</p>}
