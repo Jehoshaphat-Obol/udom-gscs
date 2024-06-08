@@ -10,6 +10,7 @@ import Signin from './pages/signin/Signin'
 import withAuth from './HOC/withAuth'
 import authService from './services/authService'
 import Map from './pages/map/Map'
+import Notification from './pages/notifications/Notification'
 
 const SystemLayout = () => {
   return (
@@ -30,7 +31,7 @@ const SystemLayout = () => {
 
 const ProtectedSystemLayout = withAuth(SystemLayout)
 const ClearSignin = (Component)=>{
-  // authService.logout()
+  // localStorage.removeItem('user');
   return (props)=>{
     return <Component {...props} />
   }
@@ -49,6 +50,7 @@ function App() {
             <Route path='/seats' element={<Seats />} />
             <Route path='/timetable' element={<Timetable />} />
             <Route path='/report' element={<Report />} />
+            <Route path='/notification' element={<Notification />} />
           </Route>
           <Route path="/map" element={<Map />} />
           <Route path="/error" element={<Error404 />} />
