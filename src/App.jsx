@@ -48,14 +48,14 @@ function App() {
           <Route path="/auth/" element={<ReSignin />} />
           <Route path="/" element={<ProtectedSystemLayout />}>
             <Route index element={<Home />} />
-            <Route path='/seats' element={<Seats />} />
-            <Route path='/timetable' element={<Timetable />} />
-            <Route path='/report' element={<Report />} />
-            <Route path='/notification' element={<Notification />} />
-            <Route path='/message' element={<Messages />} />
+            <Route path='/seats/' element={<Seats />} />
+            <Route path='/timetable/' element={<Timetable />} />
+            <Route path='/report/' element={<Report />} />
+            <Route path='/notification/' element={<Notification />} />
+            <Route path='/message/' element={<Messages />} />
           </Route>
-          <Route path="/map" element={<Map />} />
-          <Route path="/error" element={<Error404 />} />
+          <Route path="/map/" element={<Map />} />
+          <Route path="/error/" element={<Error404 />} />
           <Route path="*" element={<Error404 />} />
         </Routes>
       </BrowserRouter>
