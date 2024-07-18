@@ -132,7 +132,6 @@ class MessagesGuest extends Component {
                     </nav>
                 </div>
                 <div className="row">
-                    <div className="col-lg-8">
                         <div className="card">
                             <div className="card-body">
                                 <h5 className="card-title">Messages</h5>
@@ -145,64 +144,6 @@ class MessagesGuest extends Component {
                             </div>
                         </div>
                     </div>
-                    <div className="col-lg-4">
-                        <div className="card">
-                            <div className="card-body">
-                                <h5 className="card-title">New Message</h5>
-                                <form onSubmit={this.handleSubmit}>
-                                    <div className="mb-3">
-                                        <textarea
-                                            type="text"
-                                            id="content"
-                                            name="content"
-                                            value={newMessage.content}
-                                            onChange={this.handleMessageChange}
-                                            className='form-control'
-                                            placeholder='New Message'
-                                            required
-                                        />
-                                    </div>
-                                    <div className="mb-3">
-                                        <select
-                                            id="student"
-                                            name="student"
-                                            value={newMessage.student}
-                                            onChange={this.handleMessageChange}
-                                            className='form-control'
-                                            required
-                                        >
-                                            <option value="">Select Student</option>
-                                            {students.map(student => (
-                                                <option key={student.id} value={student.id}>
-                                                    {student.username}
-                                                </option>
-                                            ))}
-                                        </select>
-                                    </div>
-                                    <div className="mb-3">
-                                        <select
-                                            id="report"
-                                            name="report"
-                                            value={newMessage.report}
-                                            onChange={this.handleMessageChange}
-                                            className='form-control'
-                                        >
-                                            <option value="">Select Report (optional)</option>
-                                            {reports.filter((report)=> {
-                                                return report.student.id == newMessage.student;
-                                            }).map(report => (
-                                                <option key={report.id} value={report.id}>
-                                                    {report.reference_token}
-                                                </option>
-                                            ))}
-                                        </select>
-                                    </div>
-                                    <button type="submit" className='btn btn-primary'>Send Message</button>
-                                </form>
-                            </div>
-                        </div>
-                    </div>
-                </div>
             </>
         );
     }

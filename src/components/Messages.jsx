@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import axios from '../axiosInstance';
 import { Link } from 'react-router-dom';
+import authService from '../services/authService';
 
 const apiUrl = import.meta.env.VITE_API_URL;
 
@@ -42,9 +43,10 @@ class Messages extends Component {
 
     render() {
         const { messages, error } = this.state;
+        const {groups} = authService.getCurrentUser();
 
-        return (
-            <>
+        return (<>
+            {!groups.includes('coordinator') ? (
                 <li className="nav-item dropdown">
                     <a className="nav-link nav-icon" href="#" data-bs-toggle="dropdown">
                         <i className="bi bi-chat-left-text"></i>
@@ -79,6 +81,7 @@ class Messages extends Component {
                         </li>
                     </ul>
                 </li>
+            ): (<></>)}
             </>
         );
     }
